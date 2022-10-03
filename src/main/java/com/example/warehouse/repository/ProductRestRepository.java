@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ProductRestRepository {
@@ -102,7 +103,7 @@ public class ProductRestRepository {
         return product;
     }
 
-    public ReturnWithMessage addProduct(String name, String description, double priceSell, int quantity) {
+    public ReturnWithMessage addProduct(String name, String description, double priceSell, int quantity, List<Map<String, Object>> listSupplier) {
         Connection connection = null;
         connection = dataSource.getConnection();
         Product product = null;

@@ -15,9 +15,12 @@ import java.util.List;
 @Component
 public class DAOClientBuy {
     private static DAOClientBuy instance;
-    private static final String INSERT = "INSERT INTO acquistoCliente(data,descrizione) VALUES (?,?)";
+    private static final String INSERT = "INSERT INTO acquistoCliente(data,descrizione) VALUES (NOW(),?)";
+    private static final String INSERT_PRODUCTS = "INSERT INTO acquistoClienteProdotto(id_acquistoCliente, id_prodotto, prezzoProdotto, quantita, sconto) VALUES (?,?,?,?,0)";
+
     private static final String FIND_BY_DATE = "SELECT * FROM acquistoCliente JOIN acquistoClienteProdotto ON acquistoClienteProdotto.id_cliente = acquistoProdotto.id WHERE data>=? AND data<=?";
     private static final String FIND_PRODUCTS = "SELECT * FROM acquistoClienteProdotto where id_acquistoCliente = ?";
+    private static final String SCOPE_IDENTITY = "select @@identity;";
     private static final String FIND_BY_ID = "SELECT * FROM acquistoCliente JOIN acquistoClienteProdotto ON acquistoClienteProdotto.id_acquistoCliente = acquistoCliente.id WHERE acquistoCliente.id = ? LIMIT 1";
     //private static final String FIND_ALL = "SELECT * FROM acquistoCliente JOIN acquistoClienteProdotto ON acquistoClienteProdotto.id_acquistoCliente = acquistoCliente.id LIMIT 1";
     private static final String FIND_ALL = "SELECT * FROM acquistoCliente";
@@ -28,22 +31,46 @@ public class DAOClientBuy {
         super();
     }
 
-    public void insert(Connection connection, ClientBuy clientBuy) throws DAOException {
+    public boolean insert(Connection connection, String description) throws DAOException {
         PreparedStatement preparedStatement = null;
-        // Custom format if needed
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        // Format LocalDateTime
-        String formattedDateTime = clientBuy.getLocalDateTime().format(formatter);
-        // Verify
-        //System.out.println("Formatted LocalDateTime : " + formattedDateTime);
         try {
             preparedStatement = connection.prepareStatement(INSERT);
-            preparedStatement.setString(1, formattedDateTime);
-            preparedStatement.setString(2, clientBuy.getDescription());
+            preparedStatement.setString(1, description);
             preparedStatement.executeUpdate();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new DAOException("Impossibile inserire l'acquisto, errore DB");
+            return false;
+        }
+    }
+
+    public boolean insertProducts(Connection connection, List<Cart> cart) throws DAOException {
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        long l = 0;
+        try {
+            preparedStatement = connection.prepareStatement(SCOPE_IDENTITY);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                // String name = resultSet.getString("nome");
+                l = resultSet.getLong("@@identity");
+            }
+            for (Cart c:cart) {
+                preparedStatement = connection.prepareStatement(INSERT_PRODUCTS);
+                preparedStatement.setLong(1, l);
+                preparedStatement.setLong(2, c.getId());
+                preparedStatement.setDouble(3, c.getPrice());
+                preparedStatement.setInt(4, c.getQuantity());
+                preparedStatement.executeUpdate();
+                boolean value = DAOProduct.getInstance().modifyQuantity(connection,c.getId(),c.getQuantity(),"minus");
+                if(value==false)
+                    return false;
+            }
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            //throw new DAOException("Impossibile inserire l'acquisto, errore DB");
+            return false;
         }
     }
 

@@ -4,6 +4,7 @@ import com.example.warehouse.DAO.DAOClientBuy;
 import com.example.warehouse.DAO.DAOProduct;
 import com.example.warehouse.DAO.DataSource;
 import com.example.warehouse.DAO.eccezioni.DAOException;
+import com.example.warehouse.model.Cart;
 import com.example.warehouse.model.ClientBuy;
 import com.example.warehouse.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,22 @@ public class PurchaseRestRepository {
             throw new RuntimeException(e);
         }
         return list;
+    }
+
+    public boolean sell(List<Cart> cartList){
+        ClientBuy clientBuy;
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        boolean value = false;
+        try {
+            value = DAOClientBuy.getInstance().insert(connection, "");
+            if(value){
+                value = DAOClientBuy.getInstance().insertProducts(connection, cartList);
+            }
+            return value;
+        } catch (DAOException e) {
+            return value;
+        }
     }
 
     public ClientBuy getPurchases(long id){

@@ -100,9 +100,10 @@ public class DAOSupplier {
             while (resultSet.next()) {
                 long id = resultSet.getLong("id");
                 String email = resultSet.getString("email");
+                String nameSupplier = resultSet.getString("nome");
                 String phone = resultSet.getString("telefono");
                 String api = resultSet.getString("api");
-                list.add(new Supplier(id,name,email, phone, api));
+                list.add(new Supplier(id,nameSupplier,email, phone, api));
             }
         } catch (SQLException e) {
             e.printStackTrace();

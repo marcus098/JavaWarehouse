@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ProductRestService {
@@ -37,7 +38,7 @@ public class ProductRestService {
         return productRestRepository.moreOrder();
     }
 
-    public ReturnWithMessage addProduct(String name, String description, double priceSell, int quantity){
-        return productRestRepository.addProduct(name, description, priceSell, quantity);
+    public ReturnWithMessage addProduct(String name, String description, double priceSell, int quantity, List<Map<String, Object>> listSupplier){
+        return productRestRepository.addProduct(name, description, priceSell, quantity, listSupplier);
     }
 }

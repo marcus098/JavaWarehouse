@@ -2,6 +2,7 @@ package com.example.warehouse.controller;
 
 import com.example.warehouse.model.Product;
 import com.example.warehouse.model.ReturnWithMessage;
+import com.example.warehouse.model.Supplier;
 import com.example.warehouse.repository.ProductRestRepository;
 import com.example.warehouse.service.OrderRestService;
 import com.example.warehouse.service.ProductRestService;
@@ -56,7 +57,11 @@ public class ProductRestController {
         double priceSell = d.doubleValue();
         Integer i = Integer.parseInt(map.get("quantity").toString());
         int quantity = i.intValue();
-        return productRestService.addProduct(map.get("name").toString(), map.get("description").toString(), priceSell, quantity);
+        System.out.println(map.get("suppliersToSave"));
+        List<Map<String, Object>> listSupplier = (List) map.get("suppliersToSave");
+
+        //return new ReturnWithMessage(true, "");
+        return productRestService.addProduct(map.get("name").toString(), map.get("description").toString(), priceSell, quantity, listSupplier);
     }
 
 }

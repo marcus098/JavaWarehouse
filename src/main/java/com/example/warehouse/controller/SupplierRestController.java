@@ -21,7 +21,7 @@ public class SupplierRestController {
         return supplierRestService.getSuppliers();
     }
 
-    @GetMapping("/suppliers/{name}")
+    @GetMapping("/suppliers/search/{name}")
     public List<Supplier> getSuppliersByName(@PathVariable("name") String name){
         return supplierRestService.getSuppliersByName(name);
     }

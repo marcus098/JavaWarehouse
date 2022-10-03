@@ -260,19 +260,6 @@ public class DAOProduct {
         }
     }
 
-    /*public void modifyPosition(Connection connection, Product product) throws DAOException {
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = connection.prepareStatement(UPDATE_POSIZIONE);
-            preparedStatement.setLong(1, product.getPosition().getId());
-            preparedStatement.setLong(2, product.getId());
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DAOException("Impossibile modificare la posizione del prodotto, errore DB");
-        }
-    }
-*/
     public void modifySellPrice(Connection connection, Product product) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {
@@ -299,6 +286,26 @@ public class DAOProduct {
         }
     }
 
+    public boolean modifyQuantity(Connection connection, long idProduct, int quantity, String str) throws DAOException {
+        if (str == "sum" || str == "minus") {
+            PreparedStatement preparedStatement = null;
+            try {
+                if (str == "sum")
+                    preparedStatement = connection.prepareStatement(UPDATE_QUANTITY_SUM);
+                else
+                    preparedStatement = connection.prepareStatement(UPDATE_QUANTITY_MINUS);
+                preparedStatement.setInt(1, quantity);
+                preparedStatement.setLong(2, idProduct);
+                preparedStatement.executeUpdate();
+                return true;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
     public boolean modifyQuantity(Connection connection, Product product, String str) throws DAOException {
         if (str == "sum" || str == "minus") {
             PreparedStatement preparedStatement = null;

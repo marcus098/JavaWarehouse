@@ -51,11 +51,10 @@ public class OrderRestService {
             else
                 newList.add(optionalStatistics.get());
         }
-        System.out.println(newList);
         return newList;
     }
 
-    public ReturnWithMessage addOrder(double total, String description, long idProductSupplier, int quantity){
-        return orderRestRepository.addOrder(total,description, idProductSupplier, quantity);
+    public ReturnWithMessage addOrder(String description, long idProductSupplier, int quantity){
+        return orderRestRepository.addOrder(description, idProductSupplier, quantity);
     }
 }

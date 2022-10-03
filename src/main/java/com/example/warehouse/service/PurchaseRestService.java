@@ -1,5 +1,6 @@
 package com.example.warehouse.service;
 
+import com.example.warehouse.model.Cart;
 import com.example.warehouse.model.ClientBuy;
 import com.example.warehouse.repository.OrderRestRepository;
 import com.example.warehouse.repository.PurchaseRestRepository;
@@ -21,4 +22,7 @@ public class PurchaseRestService {
         return purchaseRestRepository.getPurchases(id);
     }
 
+    public boolean sell(List<Cart> cartList){
+        return purchaseRestRepository.sell(cartList);
+    }
 }

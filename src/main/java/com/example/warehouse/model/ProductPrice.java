@@ -5,6 +5,7 @@ public class ProductPrice {
     private double price;
     private double discount;
     private long id;
+    private long idProduct;
     private int quantity;
 
     public ProductPrice(Product product, double price, double discount, int quantity) {
@@ -20,6 +21,13 @@ public class ProductPrice {
         this.quantity = quantity;
         this.id = id;
         this.discount = discount;
+    }
+
+    public ProductPrice(long idProduct, String name, int quantity,double price/*, double discount*/) {
+        this.price = price;
+        //this.discount = discount;
+        this.idProduct = idProduct;
+        this.quantity = quantity;
     }
 
     public int getQuantity() {

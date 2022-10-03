@@ -99,15 +99,13 @@ public class OrderRestRepository {
         return value;
     }
 
-    public ReturnWithMessage addOrder(double total, String description, long idProductSupplier, int quantity){
+    public ReturnWithMessage addOrder(String description, long idProductSupplier, int quantity){
         Connection connection = null;
         connection = dataSource.getConnection();
-        boolean value = true;
         try {
-            return daoOrder.insert(connection, total, description, idProductSupplier, quantity);
+            return daoOrder.insert(connection, description, idProductSupplier, quantity);
         } catch (DAOException e) {
             return new ReturnWithMessage(false, "Errore");
         }
     }
-
 }

@@ -24,15 +24,7 @@ public class OrderController {
 
     @GetMapping("/orders")
     public List<Order> searchOrders(){
-        /*Order order = orderRestService.searchOrders().get(0);
-        List<Order> list = orderRestService.searchOrders();
-        for(int i = 0; i < 20; i++){
-            for(Order o : orderRestService.searchOrders())
-                list.add(o);
-        }*/
         return orderRestService.searchOrders();
-
-       // return list;
     }
 
     @PostMapping("/orders/delete")
@@ -70,18 +62,16 @@ public class OrderController {
     }
 
     @PostMapping("/orders/add")
-    public ReturnWithMessage addOrder(@RequestBody String jsonString){
+    public ReturnWithMessage addOrder(@RequestBody String jsonString) {
         Gson gson = new Gson();
         Map mapJson = gson.fromJson(jsonString, Map.class);
         Map<String, Object> map = mapJson;
-        Double d = Double.parseDouble(map.get("total").toString());
-        double total = d.doubleValue();
+        /*Double d = Double.parseDouble(map.get("total").toString());
+        double total = d.doubleValue();*/
         Integer i = Integer.parseInt(map.get("quantity").toString());
         int quantity = i.intValue();
         Long l = Long.parseLong(map.get("idProductSupplier").toString());
         long idProductSupplier = l.longValue();
-        return orderRestService.addOrder(total,map.get("description").toString(), idProductSupplier, quantity);
+        return orderRestService.addOrder(map.get("description").toString(), idProductSupplier, quantity);
     }
-
-
 }

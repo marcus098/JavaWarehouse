@@ -24,7 +24,7 @@ public class DAOOrder {
             "SELECT * FROM ordine JOIN prodottoFornitore ON prodottoFornitore.id = id_prodotto_fornitore WHERE ordine.id = ? AND arrivato = false LIMIT 1";
     private static final String FIND_BY_CATEGORY = "SELECT * FROM ordine WHERE id_categoria = ? and arrivato = false LIMIT 1";
     //private static final String FIND_ORDERS_MONTHS_QUANTITY = "select date_format(data, '%m') as mese,sum(quantita) as tot from ordine WHERE data>NOW()-INTERVAL 365 DAY AND data < NOW() group by mese;";
-    private static final String FIND_ORDERS_MONTHS_TOTAL = "select date_format(data, '%m') as mese,sum(quantita) as quantitaTot, sum(costo_prodotto*quantita) as totale from ordine JOIN prodottoFornitore on prodottoFornitore.id = ordine.id_prodotto_fornitore WHERE data>NOW()-INTERVAL 365 DAY AND data < NOW() group by mese;";
+    private static final String FIND_ORDERS_MONTHS_TOTAL = "select date_format(data, '%m') as mese,sum(quantita) as quantitaTot, sum(costo_totale) as totale from ordine JOIN prodottoFornitore on prodottoFornitore.id = ordine.id_prodotto_fornitore WHERE data>NOW()-INTERVAL 365 DAY AND data < NOW() group by mese;";
     private static final String FIND_ALL = "select ordine.id, data, costo_totale, id_prodotto,descrizione, quantita, id_prodotto_fornitore, id_fornitore as idFornitore from ordine \n" +
             "join prodottoFornitore on prodottoFornitore.id = ordine.id_prodotto_fornitore where arrivato = false";
     private static final String UPDATE_DESCRIPTION = "UPDATE ordine SET description = ? WHERE id= ? LIMIT 1";
@@ -36,14 +36,11 @@ public class DAOOrder {
         super();
     }
 
-    public ReturnWithMessage insert(Connection connection, double total, String description, long idProductSupplier, int quantity) throws DAOException {
+    public ReturnWithMessage insert(Connection connection, String description, long idProductSupplier, int quantity) throws DAOException {
         PreparedStatement preparedStatement = null;
-        // Custom format if needed
-        //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        // Format LocalDateTime
         try {
             preparedStatement = connection.prepareStatement(INSERT);
-            preparedStatement.setDouble(1, total);
+            preparedStatement.setDouble(1, getPrice(connection, idProductSupplier) * quantity);
             preparedStatement.setString(2, description);
             preparedStatement.setInt(3, quantity);
             preparedStatement.setLong(4, idProductSupplier);
@@ -84,9 +81,9 @@ public class DAOOrder {
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 String description = resultSet.getString("descrizione");
-                //double total = resultSet.getDouble("costo_totale");
+                double total = resultSet.getDouble("costo_totale");
                 int quantity = resultSet.getInt("quantita");
-                double total = getPrice(connection, resultSet.getLong("id_prodotto_fornitore")) * quantity;
+                //double total = getPrice(connection, resultSet.getLong("id_prodotto_fornitore")) * quantity;
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("data"), formatter);
                 Product product = DAOProduct.getInstance().searchById(connection,resultSet.getLong("id_prodotto"));
                 order = new Order(id, description,date,total,quantity,product);
@@ -110,9 +107,9 @@ public class DAOOrder {
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 String description = resultSet.getString("descrizione");
-                //double total = resultSet.getDouble("costo_totale");
+                double total = resultSet.getDouble("costo_totale");
                 int quantity = resultSet.getInt("quantita");
-                double total = getPrice(connection, resultSet.getLong("id_prodotto_fornitore")) * quantity;
+                //double total = getPrice(connection, resultSet.getLong("id_prodotto_fornitore")) * quantity;
                 long id = resultSet.getLong("id");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("data"), formatter);
                 Product product = DAOProduct.getInstance().searchById(connection,resultSet.getLong("id_prodotto"));
@@ -125,28 +122,6 @@ public class DAOOrder {
         }
         return list;
     }
-/*
-    public List<Map<String, Integer>> searchOrdersMonthsQuantity(Connection connection) throws DAOException {
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        List<Map<String,Integer>> list = new ArrayList<>();
-        try {
-            preparedStatement = connection.prepareStatement(FIND_ORDERS_MONTHS_QUANTITY);
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                Map<String, Integer> map = new HashMap<>();
-                int total = resultSet.getInt("tot");
-                int month = resultSet.getInt("mese");
-                map.put("tot", total);
-                map.put("month", month);
-                list.add(map);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DAOException("Impossibile cercare l'ordine, errore DB");
-        }
-        return list;
-    }*/
 
     public List<Statistics> searchOrdersMonthsQuantity(Connection connection) throws DAOException {
         PreparedStatement preparedStatement = null;
@@ -167,74 +142,6 @@ public class DAOOrder {
         }
         return statisticsList;
     }
-/*
-    public List<Map<Integer, Integer>> searchOrdersMonthsQuantity2(Connection connection) throws DAOException {
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        List<Map<Integer,Integer>> list = new ArrayList<>();
-        try {
-            preparedStatement = connection.prepareStatement(FIND_ORDERS_MONTHS_QUANTITY);
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                Map<Integer, Integer> map = new HashMap<>();
-                int total = resultSet.getInt("tot");
-                int month = resultSet.getInt("mese");
-                //map.put("tot", total);
-                //map.put("month", month);
-                map.put(month,total);
-                list.add(map);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DAOException("Impossibile cercare l'ordine, errore DB");
-        }
-        return list;
-    }
-
-    public List<Map<String, Integer>> searchOrdersMonthsTotal(Connection connection) throws DAOException {
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        List<Map<String,Integer>> list = new ArrayList<>();
-        try {
-            preparedStatement = connection.prepareStatement(FIND_ORDERS_MONTHS_TOTAL);
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                Map<String, Integer> map = new HashMap<>();
-                int total = resultSet.getInt("tot");
-                int month = resultSet.getInt("mese");
-                map.put("tot", total);
-                map.put("month", month);
-                list.add(map);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DAOException("Impossibile cercare l'ordine, errore DB");
-        }
-        return list;
-    }
-
-    public List<Map<Integer, Integer>> searchOrdersMonthsTotal2(Connection connection) throws DAOException {
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        List<Map<Integer,Integer>> list = new ArrayList<>();
-        try {
-            preparedStatement = connection.prepareStatement(FIND_ORDERS_MONTHS_TOTAL);
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                Map<Integer, Integer> map = new HashMap<>();
-                int total = resultSet.getInt("tot");
-                int month = resultSet.getInt("mese");
-                //map.put("tot", total);
-                //map.put("month", month);
-                map.put(month,total);
-                list.add(map);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DAOException("Impossibile cercare l'ordine, errore DB");
-        }
-        return list;
-    }*/
 
     public List<Order> search(Connection connection) throws DAOException {
         List<Order> list = new ArrayList<>();
@@ -246,9 +153,9 @@ public class DAOOrder {
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 String description = resultSet.getString("descrizione");
-                //double total = resultSet.getDouble("costo_totale");
+                double total = resultSet.getDouble("costo_totale");
                 int quantity = resultSet.getInt("quantita");
-                double total = getPrice(connection, resultSet.getLong("id_prodotto_fornitore")) * quantity;
+                //double total = getPrice(connection, resultSet.getLong("id_prodotto_fornitore")) * quantity;
                 long id = resultSet.getLong("id");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("data"), formatter);
                 Product product = DAOProduct.getInstance().searchById(connection,resultSet.getLong("id_prodotto"));
