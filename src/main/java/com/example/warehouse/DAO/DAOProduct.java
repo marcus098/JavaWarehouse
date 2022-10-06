@@ -19,9 +19,13 @@ public class DAOProduct {
     private static final String MORE_ORDER = "select id_prodotto, SUM(ordine.quantita) as sum from ordine JOIN prodottoFornitore ON prodottoFornitore.id = ordine.id_prodotto_fornitore JOIN prodotto ON prodotto.id = prodottoFornitore.id_prodotto WHERE data>NOW()-INTERVAL 365 DAY AND data < NOW() group by id_prodotto order by sum DESC;";
     private static final String INSERT = "INSERT INTO prodotto(nome,quantita,descrizione, prezzoVendita, id_categoria) VALUES (?,?,?,?,?)";
     private static final String FIND_BY_NAME = "SELECT * FROM prodotto WHERE nome like ?";
+    private static final String FIND_BY_NAME_SUPPLIER = "SELECT * FROM prodotto JOIN prodottoFornitore ON prodottoFornitore.id_prodotto = prodotto.id WHERE nome like ? AND id_fornitore = ?";
     private static final String FIND_BY_NAME_MIN = "SELECT * FROM prodotto WHERE nome like ? AND prezzoVendita >= ?";
+    private static final String FIND_BY_NAME_MIN_SUPPLIER = "SELECT * FROM prodotto JOIN prodottoFornitore ON prodottoFornitore.id_prodotto = prodotto.id WHERE nome like ? AND prezzoVendita >= ? AND id_fornitore = ?";
     private static final String FIND_BY_NAME_MIN_MAX = "SELECT * FROM prodotto WHERE nome like ? AND prezzoVendita >= ? AND prezzoVendita <= ?";
+    private static final String FIND_BY_NAME_MIN_MAX_SUPPLIER = "SELECT * FROM prodotto JOIN prodottoFornitore ON prodottoFornitore.id_prodotto = prodotto.id WHERE nome like ? AND prezzoVendita >= ? AND prezzoVendita <= ? AND id_fornitore = ?";
     private static final String FIND_BY_CATEGORY = "SELECT * FROM prodotto WHERE id_categoria = ?";
+    private static final String FIND_BY_CATEGORY_SUPPLIER = "SELECT * FROM prodotto JOIN prodottoFornitore ON prodottoFornitore.id_prodotto = prodotto.id WHERE id_categoria = ? AND id_fornitore = ?";
     private static final String FIND_BY_ID = "SELECT * FROM prodotto WHERE id = ? LIMIT 1";
     private static final String UPDATE_NAME = "UPDATE prodotto SET nome = ? WHERE id= ? LIMIT 1";
     private static final String UPDATE_QUANTITY = "UPDATE prodotto SET quantita = ? WHERE id= ?";
@@ -31,6 +35,7 @@ public class DAOProduct {
     private static final String UPDATE_PREZZO_VENDITA = "UPDATE prodotto SET prezzoVendita = ? WHERE id= ?";
     private static final String UPDATE_POSIZIONE = "UPDATE prodotto SET id_posizione = ? WHERE id= ?";
     private static final String UPDATE_CATEGORIA = "UPDATE prodotto SET id_categoria = ? WHERE id= ?";
+    private static final String SCOPE_IDENTITY = "select @@identity;";
     private static final String DELETE = "DELETE FROM product WHERE id = ?";
 
     private DAOProduct() {
@@ -55,13 +60,19 @@ public class DAOProduct {
         }
     }
 
-    public List<Product> searchByName(Connection connection, String name) throws DAOException {
+    public List<Product> searchByName(Connection connection, String name, long idSupplier) throws DAOException {
         List<Product> list = new ArrayList<>();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
-            preparedStatement = connection.prepareStatement(FIND_BY_NAME);
-            preparedStatement.setString(1, "%" + name + "%");
+            if(idSupplier==0) {
+                preparedStatement = connection.prepareStatement(FIND_BY_NAME);
+                preparedStatement.setString(1, "%" + name + "%");
+            }else{
+                preparedStatement = connection.prepareStatement(FIND_BY_NAME_SUPPLIER);
+                preparedStatement.setString(1, "%" + name + "%");
+                preparedStatement.setLong(2, idSupplier);
+            }
            // System.out.println(preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -81,14 +92,40 @@ public class DAOProduct {
         return list;
     }
 
-    public List<Product> searchByName(Connection connection, String name, double min) throws DAOException {
+    public long scopeIdentity(Connection connection) {
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = connection.prepareStatement(SCOPE_IDENTITY);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                // String name = resultSet.getString("nome");
+                return resultSet.getLong("@@identity");
+            }
+            return 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+            //throw new DAOException("Impossibile cercare ultimo id, errore DB");
+        }
+    }
+
+
+    public List<Product> searchByName(Connection connection, String name, double min, long idSupplier) throws DAOException {
         List<Product> list = new ArrayList<>();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
-            preparedStatement = connection.prepareStatement(FIND_BY_NAME_MIN);
-            preparedStatement.setString(1, "%" + name + "%");
-            preparedStatement.setDouble(2, min);
+            if(idSupplier==0) {
+                preparedStatement = connection.prepareStatement(FIND_BY_NAME_MIN);
+                preparedStatement.setString(1, "%" + name + "%");
+                preparedStatement.setDouble(2, min);
+            }else{
+                preparedStatement = connection.prepareStatement(FIND_BY_NAME_MIN_SUPPLIER);
+                preparedStatement.setString(1, "%" + name + "%");
+                preparedStatement.setDouble(2, min);
+                preparedStatement.setLong(3, idSupplier);
+            }
           //  System.out.println(preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -108,15 +145,23 @@ public class DAOProduct {
         return list;
     }
 
-    public List<Product> searchByName(Connection connection, String name, double min, double max) throws DAOException {
+    public List<Product> searchByName(Connection connection, String name, double min, double max, long idSupplier) throws DAOException {
         List<Product> list = new ArrayList<>();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
-            preparedStatement = connection.prepareStatement(FIND_BY_NAME_MIN_MAX);
-            preparedStatement.setString(1, "%" + name + "%");
-            preparedStatement.setDouble(2, min);
-            preparedStatement.setDouble(3, max);
+            if(idSupplier==0) {
+                preparedStatement = connection.prepareStatement(FIND_BY_NAME_MIN_MAX);
+                preparedStatement.setString(1, "%" + name + "%");
+                preparedStatement.setDouble(2, min);
+                preparedStatement.setDouble(3, max);
+            }else{
+                preparedStatement = connection.prepareStatement(FIND_BY_NAME_MIN_MAX_SUPPLIER);
+                preparedStatement.setString(1, "%" + name + "%");
+                preparedStatement.setDouble(2, min);
+                preparedStatement.setDouble(3, max);
+                preparedStatement.setLong(4, idSupplier);
+            }
            // System.out.println(preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -136,13 +181,19 @@ public class DAOProduct {
         return list;
     }
 
-    public List<Product> searchByCategory(Connection connection, long idCategory) throws DAOException {
+    public List<Product> searchByCategory(Connection connection, long idCategory, long idSupplier) throws DAOException {
         List<Product> list = new ArrayList<>();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
-            preparedStatement = connection.prepareStatement(FIND_BY_CATEGORY);
-            preparedStatement.setLong(1, idCategory);
+            if(idSupplier==0) {
+                preparedStatement = connection.prepareStatement(FIND_BY_CATEGORY);
+                preparedStatement.setLong(1, idCategory);
+            }else{
+                preparedStatement = connection.prepareStatement(FIND_BY_CATEGORY_SUPPLIER);
+                preparedStatement.setLong(1, idCategory);
+                preparedStatement.setLong(2, idSupplier);
+            }
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 int quantity = resultSet.getInt("quantita");

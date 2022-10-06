@@ -19,24 +19,24 @@ public class ProductRestController {
     @Autowired
     private ProductRestService productRestService;
 
-    @GetMapping("/productscat/{idCategory}")
-    public List<Product> getProductsByCategory(@PathVariable("idCategory") long idCategory){
-        return productRestService.getProductsByCategory(idCategory);
+    @GetMapping("/productscat/{idCategory}/{idSupplier}")
+    public List<Product> getProductsByCategory(@PathVariable("idCategory") long idCategory, @PathVariable("idSupplier") long idSupplier){
+        return productRestService.getProductsByCategory(idCategory, idSupplier);
     }
 
-    @GetMapping("/products/{name}")
-    public List<Product> getProductsByName(@PathVariable("name") String name){
-        return productRestService.getProductsByName(name);
+    @GetMapping("/products/{name}/{idSupplier}")
+    public List<Product> getProductsByName(@PathVariable("name") String name, @PathVariable("idSupplier") long idSupplier){
+        return productRestService.getProductsByName(name, idSupplier);
     }
 
-    @GetMapping("/products/{name}/{min}")
-    public List<Product> getProductsByName(@PathVariable("name") String name, @PathVariable("min") double min){
-        return productRestService.getProductsByName(name, min);
+    @GetMapping("/products/{name}/{min}/{idSupplier}")
+    public List<Product> getProductsByName(@PathVariable("name") String name, @PathVariable("min") double min, @PathVariable("idSupplier") long idSupplier){
+        return productRestService.getProductsByName(name, min, idSupplier);
     }
 
-    @GetMapping("/products/{name}/{min}/{max}")
-    public List<Product> getProductsByName(@PathVariable("name") String name, @PathVariable("min") double min, @PathVariable("max") double max){
-        return productRestService.getProductsByName(name, min, max);
+    @GetMapping("/products/{name}/{min}/{max}/{idSupplier}")
+    public List<Product> getProductsByName(@PathVariable("name") String name, @PathVariable("min") double min, @PathVariable("max") double max, @PathVariable("idSupplier") long idSupplier){
+        return productRestService.getProductsByName(name, min, max, idSupplier);
     }
 
     @GetMapping("/products/moreOrder")
@@ -49,7 +49,7 @@ public class ProductRestController {
     }
 
     @PostMapping("/products/add")
-    public ReturnWithMessage addProduct(@RequestBody String jsonString){
+    public ReturnWithMessage addProduct(@RequestBody String jsonString/*, @PathVariable("idSupplier") long idSupplier*/){
         Gson gson = new Gson();
         Map mapJson = gson.fromJson(jsonString, Map.class);
         Map<String, Object> map = mapJson;
@@ -61,7 +61,9 @@ public class ProductRestController {
         List<Map<String, Object>> listSupplier = (List) map.get("suppliersToSave");
 
         //return new ReturnWithMessage(true, "");
-        return productRestService.addProduct(map.get("name").toString(), map.get("description").toString(), priceSell, quantity, listSupplier);
+        //if(idSupplier==0)
+            return productRestService.addProduct(map.get("name").toString(), map.get("description").toString(), priceSell, quantity, listSupplier);
+        //return productRestService.addProduct(map.get("name").toString(), map.get("description").toString(), priceSell, quantity, idSupplier, map.get("name").toString())
     }
 
 }

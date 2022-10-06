@@ -14,7 +14,7 @@ public class User {
     private long id;
     private List<Token> tokenList;
 
-    public User(long id, String email, String name) {
+    public User(long id, String email, String name, String surname, String phone) {
         this.email = email;
         this.id = id;
         this.name = name;

@@ -21,12 +21,16 @@ public class CategoryRestRepository {
     @Autowired
     private DataSource dataSource;
 
-    public List<Category> getCategories(){
+    public List<Category> getCategories(long idSupplier){
         Connection connection = null;
         connection = dataSource.getConnection();
         List<Category> categoryList = new ArrayList<>();
         try {
-            categoryList = daoCategory.searchAll(connection);
+           // if(idSupplier==0) {
+                categoryList = daoCategory.searchAll(connection, idSupplier);
+            /*}else{
+                categoryList = daoCategory.searchAll(connection);
+            }*/
         } catch (DAOException e) {
             throw new RuntimeException(e);
         }

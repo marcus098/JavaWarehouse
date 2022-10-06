@@ -16,13 +16,14 @@ public class CategoryRestController {
     @Autowired
     private CategoryRestService categoryRestService;
 
-    @GetMapping("/categories")
-    public List<Category> getCategories(){
-        return categoryRestService.getCategories();
+    @GetMapping("/categories/{idSupplier}")
+    public List<Category> getCategories(@PathVariable long idSupplier){
+        //System.out.println(idSupplier);
+        return categoryRestService.getCategories(idSupplier);
     }
 
-    @PostMapping("/categories/add")
-    public ReturnWithMessage addCategory(@RequestBody String jsonString){
+    @PostMapping("/categories/add/")
+    public ReturnWithMessage addCategory(@RequestBody String jsonString, @PathVariable long idSupplier){
         Gson gson = new Gson();
         Map mapJson = gson.fromJson(jsonString, Map.class);
         Map<String, String> map = mapJson;

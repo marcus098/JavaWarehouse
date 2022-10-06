@@ -16,6 +16,10 @@ public class PositionRestService {
     @Autowired
     private PositionRestRepository positionRestRepository;
 
+    public List<Position> getPositions(){
+        return positionRestRepository.getPositions();
+    }
+
     public List<Position> searchPositionByName(String name, long id){
         List<Position> list = new ArrayList<>();
         list.addAll(positionRestRepository.searchPositionByName(name));

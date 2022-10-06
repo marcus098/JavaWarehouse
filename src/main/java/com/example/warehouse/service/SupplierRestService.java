@@ -19,4 +19,8 @@ public class SupplierRestService {
     public List<Supplier> getSuppliersByName(String name){
         return supplierRestRepository.getSuppliersByName(name);
     }
+
+    public boolean addSupplier(String name, String email, String phone, String api){
+        return supplierRestRepository.addSupplier(name, email, phone, api);
+    }
 }

@@ -16,8 +16,9 @@ import java.util.List;
 public class DAOSupplier {
 
     private static DAOSupplier instance;
-    private static final String INSERT = "INSERT INTO fornitore(nome,email,telefono,api) VALUES (?,?,?.?)";
+    private static final String INSERT = "INSERT INTO fornitore(nome,email,telefono,api) VALUES (?,?,?,?)";
     private static final String FIND_BY_NAME = "SELECT * FROM fornitore WHERE nome like ?";
+    private static final String INSERT_PRODUCT_SUPPLIER = "INSERT INTO prodottoFornitore(id_prodotto, id_fornitore, costo_prodotto) VALUES (?,?,?)";
     private static final String FIND_BY_IDPRODUCT = "SELECT * FROM fornitore JOIN prodottoFornitore on prodottoFornitore.id_fornitore = fornitore.id WHERE id_prodotto = ?";
     private static final String FIND_ALL = "SELECT * FROM fornitore";
     private static final String FIND_BY_ID = "SELECT * FROM fornitore WHERE id = ? LIMIT 1";
@@ -31,7 +32,7 @@ public class DAOSupplier {
         super();
     }
 
-    public void insert(Connection connection, Supplier supplier) throws DAOException {
+    public boolean insert(Connection connection, Supplier supplier) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(INSERT);
@@ -39,10 +40,28 @@ public class DAOSupplier {
             preparedStatement.setString(2,supplier.getEmail());
             preparedStatement.setString(3,supplier.getPhone());
             preparedStatement.setString(4,supplier.getApi());
+            System.out.println(preparedStatement);
             preparedStatement.executeUpdate();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new DAOException("Impossibile inserire il fornitore, errore DB");
+            return false;
+            //throw new DAOException("Impossibile inserire il fornitore, errore DB");
+        }
+    }
+    public boolean insertProductSupplier(Connection connection, long idProduct, long idSupplier, double price) throws DAOException {
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(INSERT_PRODUCT_SUPPLIER);
+            preparedStatement.setLong(1,idProduct);
+            preparedStatement.setLong(2,idSupplier);
+            preparedStatement.setDouble(3,price);
+            preparedStatement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+            //throw new DAOException("Impossibile inserire il fornitore, errore DB");
         }
     }
     public List<Supplier> searchAll(Connection connection) throws DAOException {

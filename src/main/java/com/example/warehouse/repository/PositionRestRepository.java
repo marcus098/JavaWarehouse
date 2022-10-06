@@ -21,6 +21,18 @@ public class PositionRestRepository {
     @Autowired
     private DataSource dataSource;
 
+    public List<Position> getPositions(){
+        List<Position> list = new ArrayList<>();
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        try {
+            list = daoPosition.searchAll(connection);
+        } catch (DAOException e) {
+            throw new RuntimeException(e);
+        }
+        return list;
+    }
+
     public List<Position> searchPositionByName(String name){
         List<Position> list = new ArrayList<>();
         Connection connection = null;

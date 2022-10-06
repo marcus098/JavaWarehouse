@@ -20,6 +20,7 @@ public class DAOCategory {
     private static final String INSERT = "INSERT INTO categoria(nome,descrizione) VALUES (?,?)";
     private static final String FIND_BY_NAME = "SELECT * FROM categoria WHERE nome=?";
     private static final String FIND_ALL = "SELECT * FROM categoria";
+    private static final String FIND_ALL_SUPPLIER = "select categoria.id as id, categoria.nome as nome, categoria.descrizione as descrizione from categoria JOIN prodotto on prodotto.id_categoria = categoria.id JOIN prodottoFornitore on prodottoFornitore.id_prodotto = prodotto.id WHERE id_fornitore = ?";
     private static final String FIND_BY_ID = "SELECT * FROM categoria WHERE id = ? LIMIT 1";
     private static final String UPDATE_NAME = "UPDATE categoria SET nome = ? WHERE id= ? LIMIT 1";
     private static final String UPDATE_DESCRIPTION = "UPDATE categoria SET descrizione = ? WHERE id= ?";
@@ -64,12 +65,17 @@ public class DAOCategory {
         return list;
     }
 
-    public List<Category> searchAll(Connection connection) throws DAOException {
+    public List<Category> searchAll(Connection connection, long idSupplier) throws DAOException {
         List<Category> list = new ArrayList<>();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
-            preparedStatement = connection.prepareStatement(FIND_ALL);
+            if(idSupplier == 0) {
+                preparedStatement = connection.prepareStatement(FIND_ALL);
+            }else{
+                preparedStatement = connection.prepareStatement(FIND_ALL_SUPPLIER);
+                preparedStatement.setLong(1, idSupplier);
+            }
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 long id = resultSet.getLong("id");

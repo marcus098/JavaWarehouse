@@ -15,8 +15,8 @@ public class CategoryRestService {
     @Autowired
     private CategoryRestRepository categoryRestRepository;
 
-    public List<Category> getCategories() {
-        return categoryRestRepository.getCategories();
+    public List<Category> getCategories(long idSupplier) {
+        return categoryRestRepository.getCategories(idSupplier);
     }
 
     public ReturnWithMessage addCategory(String name, String description){

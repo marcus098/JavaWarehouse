@@ -21,6 +21,11 @@ public class PositionRestController {
         return positionRestService.searchPositionByName(name, idProduct);
     }
 
+    @GetMapping("/positions")
+    public List<Position> getPositions(){
+        return positionRestService.getPositions();
+    }
+
     @PostMapping("/position/add")
     public ReturnWithMessage addPosition(@RequestBody String jsonString) {
         Gson gson = new Gson();

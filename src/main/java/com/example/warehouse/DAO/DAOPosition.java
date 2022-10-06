@@ -20,8 +20,8 @@ public class DAOPosition {
     private static final String SCOPE_IDENTITY = "select @@identity;";
     private static final String INSERT_WITH_PRODUCT = "INSERT INTO posizione(nome,descrizione, id_prodotto) VALUES (?,?,?)";
     private static final String FIND_BY_ID = "SELECT * FROM posizione WHERE id = ? LIMIT 1";
-    private static final String FIND_BY_ID_PRODUCT = "SELECT * FROM posizione WHERE posizione.id_prodotto= ? ";
-    //private static final String FIND_BY_NAME_ID_PRODUCT = "SELECT * FROM posizione WHERE id = ? LIMIT 1";
+    private static final String FIND_ALL = "SELECT * FROM posizione";
+    private static final String FIND_BY_ID_PRODUCT = "SELECT * FROM posizione WHERE posizione.id_prodotto= ?";
     private static final String FIND_BY_NAME_ID_PRODUCT = "SELECT * FROM posizione JOIN prodotto ON posizione.id_prodotto = prodotto.id WHERE posizione.nome = ? AND posizione.id_prodotto= ? LIMIT 1";
     private static final String FIND_NULL = "SELECT * FROM posizione WHERE posizione.nome = ? AND (id_prodotto is null)";
     private static final String UPDATE_DESCRIPTION = "UPDATE posizione SET descrizione = ? WHERE id= ?";
@@ -99,6 +99,27 @@ public class DAOPosition {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public List<Position> searchAll(Connection connection) throws DAOException {
+        List<Position> list = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = connection.prepareStatement(FIND_ALL);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                long id = resultSet.getLong("id");
+                String description = resultSet.getString("descrizione");
+                String name = resultSet.getString("nome");
+                Product product = DAOProduct.getInstance().searchById(connection, resultSet.getLong("posizione.id_prodotto"));
+                list.add(new Position(id, name, description, product));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException("Impossibile cercare la posizione, errore DB");
+        }
+        return list;
     }
 
     public List<Position> searchByName(Connection connection, String name) throws DAOException {

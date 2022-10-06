@@ -20,7 +20,7 @@ public class SupplierRestRepository {
     @Autowired
     private DataSource dataSource;
 
-    public List<Supplier> getSuppliers(){
+    public List<Supplier> getSuppliers() {
         List<Supplier> list = new ArrayList<>();
         Connection connection = null;
         connection = dataSource.getConnection();
@@ -32,7 +32,7 @@ public class SupplierRestRepository {
         return list;
     }
 
-    public List<Supplier> getSuppliersByName(String name){
+    public List<Supplier> getSuppliersByName(String name) {
         List<Supplier> list = new ArrayList<>();
         Connection connection = null;
         connection = dataSource.getConnection();
@@ -44,4 +44,16 @@ public class SupplierRestRepository {
         return list;
     }
 
+    public boolean addSupplier(String name, String email, String phone, String api) {
+        boolean flag = false;
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        try {
+            flag = daoSupplier.insert(connection, new Supplier(name, email, phone, api));
+        } catch (DAOException e) {
+            //throw new RuntimeException(e);
+            return false;
+        }
+        return flag;
+    }
 }

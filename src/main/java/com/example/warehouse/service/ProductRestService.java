@@ -15,20 +15,20 @@ public class ProductRestService {
     @Autowired
     private ProductRestRepository productRestRepository;
 
-    public List<Product> getProductsByCategory(long idCategory){
-        return productRestRepository.getProductsByCategory(idCategory);
+    public List<Product> getProductsByCategory(long idCategory, long idSupplier){
+        return productRestRepository.getProductsByCategory(idCategory, idSupplier);
     }
 
-    public List<Product> getProductsByName(String name){
-        return productRestRepository.getProductsByName(name);
+    public List<Product> getProductsByName(String name, long idSupplier){
+        return productRestRepository.getProductsByName(name, idSupplier);
     }
 
-    public List<Product> getProductsByName(String name, double min){
-        return productRestRepository.getProductsByName(name, min);
+    public List<Product> getProductsByName(String name, double min, long idSupplier){
+        return productRestRepository.getProductsByName(name, min, idSupplier);
     }
 
-    public List<Product> getProductsByName(String name, double min, double max){
-        return productRestRepository.getProductsByName(name, min, max);
+    public List<Product> getProductsByName(String name, double min, double max, long idSupplier){
+        return productRestRepository.getProductsByName(name, min, max, idSupplier);
     }
 
     public Product moreSell(){

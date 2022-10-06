@@ -57,7 +57,7 @@ public class UserRestRepository {
                 user.addToken(userToken);
                 userList.add(user);
             } else {
-                mapReturn.put("error", "utente non trovato");
+                mapReturn.put("error", "Credenziali errate");
             }
         } catch (DAOException e) {
             System.out.println(e.getMessage());
@@ -65,7 +65,7 @@ public class UserRestRepository {
         } finally {
             dataSource.close(connection);
             if (mapReturn.isEmpty())
-                mapReturn.put("error", "utente non trovato");
+                mapReturn.put("error", "Credenziali errate");
             return mapReturn;
         }
     }
