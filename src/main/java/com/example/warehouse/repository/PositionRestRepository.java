@@ -93,11 +93,34 @@ public class PositionRestRepository {
         }
     }
 
+    public List<Position> searchPositionByIdProduct(long idProduct){
+        List<Position> list = new ArrayList<>();
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        try {
+            list = daoPosition.searchByIdProduct(connection,idProduct);
+        } catch (DAOException e) {
+            throw new RuntimeException(e);
+        }
+        return list;
+    }
+
     public boolean deletePosition(long id){
         Connection connection = null;
         connection = dataSource.getConnection();
         try {
             return daoPosition.delete(connection, id);
+        } catch (DAOException e) {
+            //throw new RuntimeException(e);
+            return false;
+        }
+    }
+
+    public boolean emptyPosition(long id){
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        try {
+            return daoPosition.modifyProductNull(connection, id);
         } catch (DAOException e) {
             //throw new RuntimeException(e);
             return false;

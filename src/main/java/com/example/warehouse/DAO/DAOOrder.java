@@ -19,7 +19,7 @@ import java.util.Map;
 public class DAOOrder {
 
     private static DAOOrder instance;
-    private static final String INSERT = "INSERT INTO ordine(data,costo_totale,descrizione, quantita, id_prodotto_fornitore,arrivato) VALUES (NOW(),?,?,?,?,?)";
+    private static final String INSERT = "INSERT INTO ordine(data,costo_totale,descrizione, quantita, id_prodotto_fornitore,arrivato) VALUES (NOW(),?,?,?,?,0)";
     private static final String FIND_BY_ID = "\n" +
             "SELECT * FROM ordine JOIN prodottoFornitore ON prodottoFornitore.id = id_prodotto_fornitore WHERE ordine.id = ? AND arrivato = false LIMIT 1";
     private static final String FIND_BY_CATEGORY = "SELECT * FROM ordine WHERE id_categoria = ? and arrivato = false LIMIT 1";
@@ -48,7 +48,7 @@ public class DAOOrder {
             return new ReturnWithMessage(true, "Ordine aggiunto con successo");
         } catch (SQLException e) {
             e.printStackTrace();
-            return new ReturnWithMessage(false, "Impossibile inserire l'utente, errore DB");
+            return new ReturnWithMessage(false, "Impossibile inserire l'ordine, errore DB");
         }
     }
     public double getPrice(Connection connection, long id) throws DAOException {

@@ -27,6 +27,10 @@ public class PositionRestService {
         return list;
     }
 
+    public List<Position> searchPositionByIdProduct(long idProduct) {
+        return positionRestRepository.searchPositionByIdProduct(idProduct);
+    }
+
     public ReturnWithMessage addPosition(Position position){
         if(positionRestRepository.addPosition(position))
             return new ReturnWithMessage(true, "Posizione aggiunta");
@@ -43,6 +47,10 @@ public class PositionRestService {
         if(positionRestRepository.updateProductPosition(idPosition))
             return new ReturnWithMessage(true, "Modificato con successo");
         return new ReturnWithMessage(false, "Errore");
+    }
+
+    public boolean emptyPosition(long id){
+        return positionRestRepository.emptyPosition(id);
     }
 
     public boolean deletePosition(long id){

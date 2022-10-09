@@ -6,6 +6,7 @@ public class Supplier {
     private String email;
     private String phone;
     private String api;
+    private double price;
 
     public Supplier(long id, String name, String email, String phone, String api) {
         this.id = id;
@@ -20,6 +21,22 @@ public class Supplier {
         this.email = email;
         this.phone = phone;
         this.api = api;
+    }
+    public Supplier(long id, String name, String email, String phone, String api, double price) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.api = api;
+        this.price = price;
+    }
+
+    public Supplier(String name, String email, String phone, String api, double price) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.api = api;
+        this.price = price;
     }
 
     public long getId() {
@@ -58,6 +75,14 @@ public class Supplier {
         this.api = api;
     }
 
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
     @Override
     public String toString() {
         return "Supplier{" +
@@ -65,6 +90,7 @@ public class Supplier {
                 ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
                 ", api='" + api + '\'' +
+                ", price='" + price + '\'' +
                 '}';
     }
 }

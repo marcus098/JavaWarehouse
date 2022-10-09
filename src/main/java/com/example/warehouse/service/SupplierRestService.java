@@ -23,4 +23,8 @@ public class SupplierRestService {
     public boolean addSupplier(String name, String email, String phone, String api){
         return supplierRestRepository.addSupplier(name, email, phone, api);
     }
+
+    public List<Supplier> getProducts(long idProduct) {
+        return supplierRestRepository.getProducts(idProduct);
+    }
 }

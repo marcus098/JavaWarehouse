@@ -31,4 +31,9 @@ public class SupplierRestController {
             api = request.get("api");
         return supplierRestService.addSupplier(request.get("name"), request.get("email"), request.get("phone"), api);
     }
+
+    @PostMapping("/suppliers/getProduct/{idProduct}")
+    public List<Supplier> getProducts(@PathVariable ("idProduct") long idProduct){
+        return supplierRestService.getProducts(idProduct);
+    }
 }

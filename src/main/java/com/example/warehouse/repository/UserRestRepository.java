@@ -3,6 +3,8 @@ package com.example.warehouse.repository;
 import com.example.warehouse.DAO.DAOUser;
 import com.example.warehouse.DAO.DataSource;
 import com.example.warehouse.DAO.eccezioni.DAOException;
+import com.example.warehouse.model.ReturnWithMessage;
+import com.example.warehouse.model.Supplier;
 import com.example.warehouse.model.Token;
 import com.example.warehouse.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +44,6 @@ public class UserRestRepository {
                 //Controllo che il token non esista da nessun utente
                 boolean flag = false;
                 Token userToken = new Token();
-
                 while(!flag) {
                     flag = true;
                     for (User u : userList) {
@@ -68,6 +69,33 @@ public class UserRestRepository {
                 mapReturn.put("error", "Credenziali errate");
             return mapReturn;
         }
+    }
+
+    public ReturnWithMessage addUser(String name, String surname, String email, String phone, String password, long idRole){
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        try {
+            return daoUser.insert(connection, name, surname, email, phone, password, idRole);
+        } catch (DAOException e) {
+            //throw new RuntimeException(e);
+            return new ReturnWithMessage(false, "Errore");
+        }
+    }
+
+    public List<User> getUser(long id){
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        //List<User> userList = new ArrayList<>();
+        return daoUser.getUsers(connection, id);
+    }
+
+    public User getUserByToken(String token){
+        Optional<User> userOptional;
+        userOptional = userList.stream().filter((user -> user.checkToken(token))).findFirst();
+        if(userOptional.isEmpty())
+            return null;
+        else
+            return userOptional.get();
     }
 
     public int checkToken(String token) {

@@ -20,6 +20,14 @@ public class User {
         this.name = name;
         tokenList = new ArrayList<>();
     }
+    public User(long id, String email, String name, String surname, String phone, Role role){
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        this.surname = surname;
+        this.phone = phone;
+        this.role = role;
+    }
 
     public User(String email, String name, String surname, String phone) {
         this.email = email;

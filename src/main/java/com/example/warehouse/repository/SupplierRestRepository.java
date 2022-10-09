@@ -8,6 +8,7 @@ import com.example.warehouse.model.ClientBuy;
 import com.example.warehouse.model.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -55,5 +56,19 @@ public class SupplierRestRepository {
             return false;
         }
         return flag;
+    }
+
+    public List<Supplier> getProducts(long idProduct) {
+        List<Supplier> list = new ArrayList<>();
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        try {
+            list = daoSupplier.getSupplierByIdProduct(connection, idProduct);
+        } /*catch (DAOException e) {
+            throw new RuntimeException(e);
+        }*/ catch (Exception e) {
+            return null;
+        }
+        return list;
     }
 }

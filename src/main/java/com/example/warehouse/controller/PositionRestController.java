@@ -20,6 +20,10 @@ public class PositionRestController {
     public List<Position> searchPositionByName(@PathVariable("name") String name, @PathVariable("id") long idProduct) {
         return positionRestService.searchPositionByName(name, idProduct);
     }
+    @GetMapping("/position/{id}")
+    public List<Position> searchPositionByIdProduct(@PathVariable("id") long idProduct) {
+        return positionRestService.searchPositionByIdProduct(idProduct);
+    }
 
     @GetMapping("/positions")
     public List<Position> getPositions(){
@@ -48,9 +52,14 @@ public class PositionRestController {
         return new ReturnWithMessage(false, "Dati mancanti");
     }
 
-    @GetMapping("/position/delete/{id}")
+    @PostMapping("/position/delete/{id}")
     public boolean deletePosition(@PathVariable("id") long id){
         return positionRestService.deletePosition(id);
+    }
+
+    @PostMapping("/position/empty/{id}")
+    public boolean emptyPosition(@PathVariable("id") long id){
+        return positionRestService.emptyPosition(id);
     }
 
 }

@@ -72,6 +72,8 @@ public class OrderController {
         int quantity = i.intValue();
         Long l = Long.parseLong(map.get("idProductSupplier").toString());
         long idProductSupplier = l.longValue();
+        System.out.println(map.get("description").toString() +" " + idProductSupplier +" "+ quantity);
+        //return null;
         return orderRestService.addOrder(map.get("description").toString(), idProductSupplier, quantity);
     }
 }

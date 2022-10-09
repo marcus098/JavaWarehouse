@@ -19,7 +19,7 @@ public class DAOSupplier {
     private static final String INSERT = "INSERT INTO fornitore(nome,email,telefono,api) VALUES (?,?,?,?)";
     private static final String FIND_BY_NAME = "SELECT * FROM fornitore WHERE nome like ?";
     private static final String INSERT_PRODUCT_SUPPLIER = "INSERT INTO prodottoFornitore(id_prodotto, id_fornitore, costo_prodotto) VALUES (?,?,?)";
-    private static final String FIND_BY_IDPRODUCT = "SELECT * FROM fornitore JOIN prodottoFornitore on prodottoFornitore.id_fornitore = fornitore.id WHERE id_prodotto = ?";
+    private static final String FIND_BY_IDPRODUCT = "SELECT fornitore.id as id, costo_prodotto, email, telefono, nome, api FROM fornitore JOIN prodottoFornitore on prodottoFornitore.id_fornitore = fornitore.id WHERE id_prodotto = ?";
     private static final String FIND_ALL = "SELECT * FROM fornitore";
     private static final String FIND_BY_ID = "SELECT * FROM fornitore WHERE id = ? LIMIT 1";
     private static final String UPDATE_NAME = "UPDATE fornitore SET nome = ? WHERE id= ? LIMIT 1";
@@ -98,9 +98,10 @@ public class DAOSupplier {
                 long id = resultSet.getLong("id");
                 String email = resultSet.getString("email");
                 String phone = resultSet.getString("telefono");
-                String name = resultSet.getString("name");
+                String name = resultSet.getString("nome");
                 String api = resultSet.getString("api");
-                list.add(new Supplier(id,name,email, phone, api));
+                double price = resultSet.getDouble("costo_prodotto");
+                list.add(new Supplier(id,name,email, phone, api, price));
             }
         } catch (SQLException e) {
             e.printStackTrace();
