@@ -64,9 +64,7 @@ public class SupplierRestRepository {
         connection = dataSource.getConnection();
         try {
             list = daoSupplier.getSupplierByIdProduct(connection, idProduct);
-        } /*catch (DAOException e) {
-            throw new RuntimeException(e);
-        }*/ catch (Exception e) {
+        } catch (Exception e) {
             return null;
         }
         return list;

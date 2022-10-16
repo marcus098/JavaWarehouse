@@ -7,6 +7,7 @@ import com.example.warehouse.DAO.eccezioni.DAOException;
 import com.example.warehouse.model.Cart;
 import com.example.warehouse.model.ClientBuy;
 import com.example.warehouse.model.Product;
+import com.example.warehouse.model.Statistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -59,5 +60,17 @@ public class PurchaseRestRepository {
             throw new RuntimeException(e);
         }
         return clientBuy;
+    }
+
+    public List<Statistics> searchQuantitySellsMonths() {
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        List<Statistics> statisticsList = new ArrayList<>();
+        try {
+            statisticsList = daoClientBuy.searchSellsMonthsQuantity(connection);
+        } catch (DAOException e) {
+            throw new RuntimeException(e);
+        }
+        return statisticsList;
     }
 }

@@ -30,15 +30,37 @@ public class DAOOrder {
     private static final String UPDATE_DESCRIPTION = "UPDATE ordine SET description = ? WHERE id= ? LIMIT 1";
     private static final String DELETE = "DELETE FROM ordine WHERE id = ?";
     private static final String GETPRICE = "SELECT costo_prodotto FROM prodottoFornitore WHERE id = ? LIMIT 1";
+    private static final String GETPRODUCTSUPPLIER = "SELECT id FROM prodottoFornitore WHERE id_prodotto = ? AND id_fornitore = ? LIMIT 1";
     private static final String CONFIRM = "UPDATE ordine SET arrivato = true WHERE id = ?";
 
     private DAOOrder() {
         super();
     }
 
-    public ReturnWithMessage insert(Connection connection, String description, long idProductSupplier, int quantity) throws DAOException {
+    private long getidProductSupplier(Connection connection, long idSupplier, long idProduct) {
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        long id = 0;
+        try {
+            preparedStatement = connection.prepareStatement(GETPRODUCTSUPPLIER);
+            preparedStatement.setLong(1, idProduct);
+            preparedStatement.setLong(2, idSupplier);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next())
+                id = resultSet.getLong("id");
+            return id;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    public ReturnWithMessage insert(Connection connection, String description, long idSupplier, long idProduct, int quantity) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {
+            long idProductSupplier = getidProductSupplier(connection, idSupplier, idProduct);
+            if(idProductSupplier==0)
+                return new ReturnWithMessage(false, "Errore");
             preparedStatement = connection.prepareStatement(INSERT);
             preparedStatement.setDouble(1, getPrice(connection, idProductSupplier) * quantity);
             preparedStatement.setString(2, description);
@@ -51,6 +73,7 @@ public class DAOOrder {
             return new ReturnWithMessage(false, "Impossibile inserire l'ordine, errore DB");
         }
     }
+
     public double getPrice(Connection connection, long id) throws DAOException {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -85,8 +108,8 @@ public class DAOOrder {
                 int quantity = resultSet.getInt("quantita");
                 //double total = getPrice(connection, resultSet.getLong("id_prodotto_fornitore")) * quantity;
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("data"), formatter);
-                Product product = DAOProduct.getInstance().searchById(connection,resultSet.getLong("id_prodotto"));
-                order = new Order(id, description,date,total,quantity,product);
+                Product product = DAOProduct.getInstance().searchById(connection, resultSet.getLong("id_prodotto"));
+                order = new Order(id, description, date, total, quantity, product);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -112,9 +135,9 @@ public class DAOOrder {
                 //double total = getPrice(connection, resultSet.getLong("id_prodotto_fornitore")) * quantity;
                 long id = resultSet.getLong("id");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("data"), formatter);
-                Product product = DAOProduct.getInstance().searchById(connection,resultSet.getLong("id_prodotto"));
+                Product product = DAOProduct.getInstance().searchById(connection, resultSet.getLong("id_prodotto"));
                 long supplier = resultSet.getLong("idFornitore");
-                list.add(new Order(id, description,date,total,quantity,product,DAOSupplier.getInstance().searchById(connection,supplier)));
+                list.add(new Order(id, description, date, total, quantity, product, DAOSupplier.getInstance().searchById(connection, supplier)));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -158,12 +181,12 @@ public class DAOOrder {
                 //double total = getPrice(connection, resultSet.getLong("id_prodotto_fornitore")) * quantity;
                 long id = resultSet.getLong("id");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("data"), formatter);
-                Product product = DAOProduct.getInstance().searchById(connection,resultSet.getLong("id_prodotto"));
+                Product product = DAOProduct.getInstance().searchById(connection, resultSet.getLong("id_prodotto"));
                 List<Position> positionList = new ArrayList<>();
                 positionList = DAOPosition.getInstance().searchByIdProduct(connection, resultSet.getLong("id_prodotto"));
                 product.setPositionList(positionList);
                 long supplier = resultSet.getLong("idFornitore");
-                list.add(new Order(id, description,date,total,quantity,product,DAOSupplier.getInstance().searchById(connection,supplier)));
+                list.add(new Order(id, description, date, total, quantity, product, DAOSupplier.getInstance().searchById(connection, supplier)));
 
             }
         } catch (SQLException e) {
@@ -197,6 +220,7 @@ public class DAOOrder {
             throw new DAOException("Impossibile eliminare l'ordine, errore DB");
         }
     }
+
     public boolean delete(Connection connection, long id) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {
@@ -210,6 +234,7 @@ public class DAOOrder {
             return false;
         }
     }
+
     public boolean updateArrived(Connection connection, long id) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {

@@ -1,5 +1,6 @@
 package com.example.warehouse.service;
 
+import com.example.warehouse.DAO.eccezioni.DAOException;
 import com.example.warehouse.model.ReturnWithMessage;
 import com.example.warehouse.model.User;
 import com.example.warehouse.repository.UserRestRepository;
@@ -33,6 +34,9 @@ public class UserRestService {
     public int checkToken(String token){
         return userRestRepository.checkToken(token);
     }
+    public ReturnWithMessage checkToken(String token, int page){
+        return userRestRepository.checkToken(token, page);
+    }
     public ReturnWithMessage addUser(String name, String surname, String email, String phone, String password, long idRole){
         return userRestRepository.addUser(name, surname, email, phone, password, idRole);
     }
@@ -45,4 +49,7 @@ public class UserRestService {
         return userRestRepository.getUserByToken(token);
     }
 
+    public ReturnWithMessage modifyUser(User user, String password) {
+        return userRestRepository.modifyUser(user, password);
+    }
 }

@@ -2,6 +2,7 @@ package com.example.warehouse.DAO;
 
 import com.example.warehouse.DAO.eccezioni.DAOException;
 import com.example.warehouse.model.*;
+import com.example.warehouse.repository.AutomationRestRepository;
 import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
@@ -324,11 +325,11 @@ public class DAOProduct {
         }
     }
 
-    public void modifyQuantity(Connection connection, Product product) throws DAOException {
+    public void modifyQuantity(Connection connection, Product product, int quantity) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(UPDATE_QUANTITY);
-            preparedStatement.setInt(1, product.getQuantity());
+            preparedStatement.setInt(1, quantity);
             preparedStatement.setLong(2, product.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {

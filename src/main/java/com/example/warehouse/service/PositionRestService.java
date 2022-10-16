@@ -4,6 +4,7 @@ import com.example.warehouse.model.Position;
 import com.example.warehouse.model.ReturnWithMessage;
 import com.example.warehouse.repository.PositionRestRepository;
 import com.example.warehouse.repository.ProductRestRepository;
+import com.example.warehouse.repository.UserRestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,12 @@ import java.util.List;
 public class PositionRestService {
     @Autowired
     private PositionRestRepository positionRestRepository;
+    @Autowired
+    private UserRestRepository userRestRepository;
+
+    public boolean checkToken(String token, int page){
+        return userRestRepository.checkToken(token, page).isBool();
+    }
 
     public List<Position> getPositions(){
         return positionRestRepository.getPositions();

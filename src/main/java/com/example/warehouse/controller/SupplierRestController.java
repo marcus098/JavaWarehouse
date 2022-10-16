@@ -33,7 +33,7 @@ public class SupplierRestController {
     }
 
     @PostMapping("/suppliers/getProduct/{idProduct}")
-    public List<Supplier> getProducts(@PathVariable ("idProduct") long idProduct){
+    public List<Supplier> getProducts(@PathVariable ("idProduct") long idProduct, @RequestBody Map<String, String> token){
         return supplierRestService.getProducts(idProduct);
     }
 }

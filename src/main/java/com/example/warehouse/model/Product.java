@@ -9,6 +9,7 @@ public class Product {
     private String description;
     private double priceSell;
     private int quantity;
+    private double discount;
     private List<Supplier> supplierList; // da inizializzare
     private List<Position> positionList = new ArrayList<>();
     private Category category;
@@ -45,6 +46,56 @@ public class Product {
         this.quantity = quantity;
         this.positionList = positionList;
         this.category = category;
+    }
+
+    //Discount
+
+    public Product(long id, String name, String description, double priceSell, int quantity, double discount) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.priceSell = priceSell;
+        this.quantity = quantity;
+        this.discount = discount;
+    }
+
+    public Product(String name, String description, double priceSell, int quantity, double discount) {
+        this.name = name;
+        this.description = description;
+        this.priceSell = priceSell;
+        this.quantity = quantity;
+        this.discount = discount;
+    }
+
+    public Product(long id, String name, String description, double priceSell, int quantity, List<Position> positionList, Category category, double discount) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.priceSell = priceSell;
+        this.quantity = quantity;
+        this.positionList = positionList;
+        this.category = category;
+        this.discount = discount;
+    }
+
+    public Product(String name, String description, double priceSell, int quantity, List<Position> positionList, Category category, double discount) {
+        this.name = name;
+        this.description = description;
+        this.priceSell = priceSell;
+        this.quantity = quantity;
+        this.positionList = positionList;
+        this.category = category;
+        this.discount = discount;
+    }
+    //discount fine
+
+
+    public void setDiscount(double discount) {
+        this.discount = discount;
+    }
+
+    public double getDiscount() {
+        return discount;
     }
 
     public long getId() {

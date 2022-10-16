@@ -7,16 +7,22 @@ public class Cart {
     //private double quantity;
     private int quantity;
     private double price;
+    private String userToken;
 
-    public Cart(double id, String name, double quantity, double price) {
+    public Cart(double id, String name, double quantity, double price, String userToken) {
         this.id = (long) id;
         this.name = name;
         this.quantity = (int) quantity;
         this.price = price;
+        this.userToken = userToken;
     }
 
     public double getPrice() {
         return price;
+    }
+
+    public String getUserToken() {
+        return userToken;
     }
 
     public String getName() {

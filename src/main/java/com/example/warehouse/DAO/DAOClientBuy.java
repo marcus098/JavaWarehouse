@@ -26,6 +26,9 @@ public class DAOClientBuy {
     private static final String FIND_ALL = "SELECT * FROM acquistoCliente";
     private static final String UPDATE_DESCRIPTION = "UPDATE acquistoCliente SET email = ? WHERE id= ? LIMIT 1";
     private static final String DELETE = "DELETE FROM acquistoCliente WHERE id = ?";
+    private static final String FIND_SELLS_MONTHS_TOTAL = "select date_format(data, '%m') as mese,sum(quantita) as quantitaTot, sum(prezzoProdotto*quantita*((100-sconto)/100)) as totale \n" +
+            "from acquistocliente inner join acquistoclienteprodotto on acquistocliente.id = acquistoclienteprodotto.id_acquistoCliente\n" +
+            "WHERE data>NOW()-INTERVAL 365 DAY AND data < NOW() group by mese;";
 
     private DAOClientBuy() {
         super();
@@ -44,6 +47,25 @@ public class DAOClientBuy {
         }
     }
 
+    public List<Statistics> searchSellsMonthsQuantity(Connection connection) throws DAOException{
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        List<Statistics> statisticsList = new ArrayList<>();
+        try {
+            preparedStatement = connection.prepareStatement(FIND_SELLS_MONTHS_TOTAL);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                int total = resultSet.getInt("totale");
+                int month = resultSet.getInt("mese");
+                int quantity = resultSet.getInt("quantitaTot");
+                statisticsList.add(new Statistics(month, quantity, total));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException("Impossibile cercare le statistiche di vendita, errore DB");
+        }
+        return statisticsList;
+    }
     public boolean insertProducts(Connection connection, List<Cart> cart) throws DAOException {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;

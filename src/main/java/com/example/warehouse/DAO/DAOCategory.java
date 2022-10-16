@@ -19,7 +19,10 @@ public class DAOCategory {
     private static DAOCategory instance;
     private static final String INSERT = "INSERT INTO categoria(nome,descrizione) VALUES (?,?)";
     private static final String FIND_BY_NAME = "SELECT * FROM categoria WHERE nome=?";
-    private static final String FIND_ALL = "SELECT * FROM categoria";
+    //private static final String FIND_ALL = "SELECT * FROM categoria";
+    private static final String FIND_ALL = "select count(*) as numero, id_categoria as id, categoria.nome, categoria.descrizione from prodotto\n" +
+            "inner join categoria on categoria.id = id_categoria\n" +
+            "group by(id_categoria);";
     private static final String FIND_ALL_SUPPLIER = "select categoria.id as id, categoria.nome as nome, categoria.descrizione as descrizione from categoria JOIN prodotto on prodotto.id_categoria = categoria.id JOIN prodottoFornitore on prodottoFornitore.id_prodotto = prodotto.id WHERE id_fornitore = ?";
     private static final String FIND_BY_ID = "SELECT * FROM categoria WHERE id = ? LIMIT 1";
     private static final String UPDATE_NAME = "UPDATE categoria SET nome = ? WHERE id= ? LIMIT 1";
@@ -81,7 +84,9 @@ public class DAOCategory {
                 long id = resultSet.getLong("id");
                 String description = resultSet.getString("descrizione");
                 String name = resultSet.getString("nome");
-                list.add(new Category(id, name, description));
+                int number = resultSet.getInt("numero");
+                System.out.println(number);
+                list.add(new Category(id, name, description, number));
             }
         } catch (SQLException e) {
             e.printStackTrace();

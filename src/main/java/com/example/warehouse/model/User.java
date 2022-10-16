@@ -18,6 +18,8 @@ public class User {
         this.email = email;
         this.id = id;
         this.name = name;
+        this.surname = surname;
+        this.phone = phone;
         tokenList = new ArrayList<>();
     }
     public User(long id, String email, String name, String surname, String phone, Role role){
@@ -27,6 +29,7 @@ public class User {
         this.surname = surname;
         this.phone = phone;
         this.role = role;
+        this.tokenList = new ArrayList<>();
     }
 
     public User(String email, String name, String surname, String phone) {
@@ -53,6 +56,7 @@ public class User {
         this.phone = phone;
         this.role = role;
         this.id = id;
+        this.tokenList = new ArrayList<>();
     }
 
     public User(String email, String password, String name, String surname, String phone, Role role) {
@@ -62,6 +66,7 @@ public class User {
         this.surname = surname;
         this.phone = phone;
         this.role = role;
+        this.tokenList = new ArrayList<>();
     }
 
     public User(String email, String name, String surname, String phone, long idRole, long id) {
@@ -71,7 +76,9 @@ public class User {
         this.phone = phone;
         this.idRole = idRole;
         this.id = id;
+        this.tokenList = new ArrayList<>();
     }
+
 
     public boolean addToken(Token token) {
         return this.tokenList.add(token);
@@ -88,6 +95,12 @@ public class User {
     }
 
     public boolean checkToken(String token) {
+        System.out.println(this.tokenList);
+        if(this.tokenList.size()==0) {
+            System.out.println("Errore");
+            return false;
+        }
+        System.out.println(token);
         if (this.tokenList.stream().filter(token1 -> token1.getValue().equals(token)).findFirst().isEmpty())
             return false;
         return true;
@@ -165,9 +178,13 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
+                "id='" + id + '\'' +
                 "email='" + email + '\'' +
+                "phone='" + phone + '\'' +
+                "surname='" + surname + '\'' +
                 ", name='" + name + '\'' +
-                ", tokenList=" + tokenList +
+                ", role='" + role + '\'' +
+                ", tokenList='" + tokenList + '\'' +
                 '}';
     }
 }

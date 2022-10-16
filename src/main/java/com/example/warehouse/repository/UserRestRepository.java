@@ -29,7 +29,7 @@ public class UserRestRepository {
         User user;
         Map<String, String> mapReturn = new HashMap<>();
         if (email == "" || password == "") {
-            mapReturn.put("error", "campi mancanti");
+            mapReturn.put("Errore", "campi mancanti");
             return mapReturn;
         }
         Connection connection = null;
@@ -39,12 +39,13 @@ public class UserRestRepository {
             if (user != null) {
                 mapReturn.put("id", user.getId() + "");
                 mapReturn.put("name", user.getName());
+                mapReturn.put("surname", user.getSurname());
                 mapReturn.put("email", user.getEmail());
-
+                mapReturn.put("idRole", user.getRole().getId() + "");
                 //Controllo che il token non esista da nessun utente
                 boolean flag = false;
                 Token userToken = new Token();
-                while(!flag) {
+                while (!flag) {
                     flag = true;
                     for (User u : userList) {
                         if (u.checkToken(userToken.getValue())) {
@@ -55,13 +56,16 @@ public class UserRestRepository {
                     }
                 }
                 mapReturn.put("accessToken", userToken.getValue());
-                user.addToken(userToken);
-                userList.add(user);
+                if (userList.stream().filter(user1 -> user.getId() == user.getId()).findFirst().isEmpty()) {
+                    user.addToken(userToken);
+                    userList.add(user);
+                } else {
+                    userList.stream().filter(user1 -> user.getId() == user.getId()).findFirst().get().addToken(userToken);
+                }
             } else {
                 mapReturn.put("error", "Credenziali errate");
             }
         } catch (DAOException e) {
-            System.out.println(e.getMessage());
             mapReturn.put("error", e.getMessage());
         } finally {
             dataSource.close(connection);
@@ -71,7 +75,7 @@ public class UserRestRepository {
         }
     }
 
-    public ReturnWithMessage addUser(String name, String surname, String email, String phone, String password, long idRole){
+    public ReturnWithMessage addUser(String name, String surname, String email, String phone, String password, long idRole) {
         Connection connection = null;
         connection = dataSource.getConnection();
         try {
@@ -82,17 +86,17 @@ public class UserRestRepository {
         }
     }
 
-    public List<User> getUser(long id){
+    public List<User> getUser(long id) {
         Connection connection = null;
         connection = dataSource.getConnection();
         //List<User> userList = new ArrayList<>();
         return daoUser.getUsers(connection, id);
     }
 
-    public User getUserByToken(String token){
+    public User getUserByToken(String token) {
         Optional<User> userOptional;
         userOptional = userList.stream().filter((user -> user.checkToken(token))).findFirst();
-        if(userOptional.isEmpty())
+        if (userOptional.isEmpty())
             return null;
         else
             return userOptional.get();
@@ -100,22 +104,57 @@ public class UserRestRepository {
 
     public int checkToken(String token) {
         Optional<User> userOptional = userList.stream()
-                .filter(user -> user.checkToken(token)==true)
+                .filter(user -> user.checkToken(token) == true)
                 .findFirst();
-
-        if(userOptional.isEmpty())
+        if (userOptional.isEmpty())
             return 1;
         return 0;
     }
 
+    public ReturnWithMessage checkToken(String token, int page) {
+        Optional<User> userOptional = userList.stream()
+                .filter(user -> user.checkToken(token) == true)
+                .findFirst();
+        if (userOptional.isEmpty())
+            return new ReturnWithMessage(false, "Logout");
+        if (userOptional.get().getRole().getPermissionList().stream().filter(permission -> permission.getId() == page).findFirst().isEmpty())
+            return new ReturnWithMessage(false, "Unauthorized");
+        return new ReturnWithMessage(true, "Success");
+    }
+
     public int logoutUser(String token) {
         Optional<User> userOptional = userList.stream()
-                .filter(user -> user.checkToken(token)==true)
+                .filter(user -> user.checkToken(token) == true)
                 .findFirst();
-        if(!userOptional.isEmpty() && userOptional.get().removeToken(token)==0){ //return size token user
+        if (!userOptional.isEmpty() && userOptional.get().removeToken(token) == 0) { //return size token user
             userList.remove(userOptional.get());
         }
         userList.stream().forEach(user -> user.getTokenList().stream().forEach(token1 -> System.out.println(token1.getValue())));
         return 0;
+    }
+
+    public ReturnWithMessage modifyUser(User user, String password) {
+        Optional<User> optionalUser = userList.stream().filter((user1 -> user1.getId() == user.getId())).findFirst();
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        if (optionalUser.isEmpty()) {
+            return new ReturnWithMessage(false, "Utente non trovato");
+        } else {
+            if (!user.getEmail().isEmpty())
+                optionalUser.get().setEmail(user.getEmail());
+            if (!user.getName().isEmpty())
+                optionalUser.get().setName(user.getName());
+            if (!user.getSurname().isEmpty())
+                optionalUser.get().setSurname(user.getSurname());
+            if (!user.getPhone().isEmpty())
+                optionalUser.get().setPhone(user.getPhone());
+            try {
+                if (password == "")
+                    return DAOUser.getInstance().modifyAll(connection, optionalUser.get());
+                return DAOUser.getInstance().modifyAllPassword(connection, user, password);
+            } catch (DAOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

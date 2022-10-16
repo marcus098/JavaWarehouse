@@ -39,6 +39,7 @@ public class Permission {
     @Override
     public String toString() {
         return "Permission{" +
+                "Id='" + id + '\'' +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 '}';

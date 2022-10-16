@@ -22,6 +22,7 @@ public class DAOPermission {
     private static final String UPDATE_DESCRIPRION = "UPDATE permesso SET descrizione = ? WHERE id= ? LIMIT 1";
     private static final String UPDATE_NAME = "UPDATE permesso SET nome = ? WHERE id= ?";
     private static final String DELETE = "DELETE FROM permesso WHERE id = ?";
+    private static final String SEARCH_BY_ROLE = "select * from ruolopermesso inner join permesso on permesso.id = id_permesso where id_ruolo = ?";
 
     private DAOPermission() {
         super();
@@ -38,6 +39,28 @@ public class DAOPermission {
             e.printStackTrace();
             throw new DAOException("Impossibile inserire il permesso, errore DB");
         }
+    }
+
+    public List<Permission> searchByRole(Connection connection, long idRole) throws DAOException {
+        List<Permission> list = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = connection.prepareStatement(SEARCH_BY_ROLE);
+            preparedStatement.setLong(1, idRole);
+            resultSet = preparedStatement.executeQuery();
+            System.out.println(preparedStatement);
+            while (resultSet.next()) {
+                String type = resultSet.getString("tipo");
+                String description = resultSet.getString("descrizione");
+                long id = resultSet.getLong("permesso.id");
+                list.add(new Permission(id, type, description));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException("Impossibile cercare il permesso, errore DB");
+        }
+        return list;
     }
 
     public List<Permission> searchByName(Connection connection, String name) throws DAOException {

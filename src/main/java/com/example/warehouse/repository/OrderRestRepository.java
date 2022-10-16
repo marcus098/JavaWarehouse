@@ -75,7 +75,8 @@ public class OrderRestRepository {
             }
             if(!value)
                 return false;
-            DAOProduct.getInstance().modifyQuantity(connection, order.getProduct(), "sum");
+            System.out.println(order);
+            DAOProduct.getInstance().modifyQuantity(connection, order.getProduct().getId(), order.getQuantity(), "sum");
             value = daoOrder.updateArrived(connection, id);
             return value;
         } catch (DAOException e) {
@@ -99,11 +100,11 @@ public class OrderRestRepository {
         return value;
     }
 
-    public ReturnWithMessage addOrder(String description, long idProductSupplier, int quantity){
+    public ReturnWithMessage addOrder(String description, long idSupplier, long idProduct, int quantity){
         Connection connection = null;
         connection = dataSource.getConnection();
         try {
-            return daoOrder.insert(connection, description, idProductSupplier, quantity);
+            return daoOrder.insert(connection, description, idSupplier, idProduct, quantity);
         } catch (DAOException e) {
             return new ReturnWithMessage(false, "Errore");
         }

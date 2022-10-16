@@ -2,6 +2,7 @@ package com.example.warehouse.service;
 
 import com.example.warehouse.model.Supplier;
 import com.example.warehouse.repository.SupplierRestRepository;
+import com.example.warehouse.repository.UserRestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,12 @@ import java.util.List;
 public class SupplierRestService {
     @Autowired
     SupplierRestRepository supplierRestRepository;
+    @Autowired
+    private UserRestRepository userRestRepository;
+
+    public boolean checkToken(String token, int page){
+        return userRestRepository.checkToken(token, page).isBool();
+    }
 
     public List<Supplier> getSuppliers(){
         return supplierRestRepository.getSuppliers();

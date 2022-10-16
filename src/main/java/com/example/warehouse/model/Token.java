@@ -39,4 +39,12 @@ public class Token {
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
     }
+
+    @Override
+    public String toString() {
+        return "Token{" +
+                "value='" + value + '\'' +
+                ", dateTime=" + dateTime +
+                '}';
+    }
 }

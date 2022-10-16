@@ -40,7 +40,7 @@ public class DAOSupplier {
             preparedStatement.setString(2,supplier.getEmail());
             preparedStatement.setString(3,supplier.getPhone());
             preparedStatement.setString(4,supplier.getApi());
-            System.out.println(preparedStatement);
+           // System.out.println(preparedStatement);
             preparedStatement.executeUpdate();
             return true;
         } catch (SQLException e) {

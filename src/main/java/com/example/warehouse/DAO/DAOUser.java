@@ -27,6 +27,8 @@ public class DAOUser {
     private static final String UPDATE_NAME = "UPDATE utente SET nome = ? WHERE id= ?";
     private static final String UPDATE_SURNAME = "UPDATE utente SET cognome = ? WHERE id= ?";
     private static final String UPDATE_PHONE = "UPDATE utente SET telefono = ? WHERE id= ?";
+    private static final String UPDATE_ALL = "UPDATE utente SET nome = ?, cognome=?, telefono=?,email=? WHERE id= ?";
+    private static final String UPDATE_ALL_PASSWORD = "UPDATE utente SET nome = ?, cognome=?, telefono=?,email=?, password=? WHERE id= ?";
     private static final String UPDATE_ROLE = "UPDATE utente SET id_ruolo = ? WHERE id= ?";
     private static final String DELETE = "DELETE FROM utente WHERE id = ?";
 
@@ -34,7 +36,7 @@ public class DAOUser {
         super();
     }
 
-    public List<User> getUsers(Connection connection, long idUser){
+    public List<User> getUsers(Connection connection, long idUser) {
         List<User> list = new ArrayList<>();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -50,12 +52,13 @@ public class DAOUser {
                 String phone = resultSet.getString("telefono");
                 long idRole = resultSet.getLong("id_ruolo");
                 String nameRole = resultSet.getString("nomeRuolo");
-                list.add(new User(id,email, name, surname, phone, new Role(idRole, nameRole, "")));
+                list.add(new User(id, email, name, surname, phone, new Role(idRole, nameRole, "")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
+        System.out.println(list);
         return list;
     }
 
@@ -63,12 +66,12 @@ public class DAOUser {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(INSERT);
-            preparedStatement.setString(1,user.getName());
-            preparedStatement.setString(2,user.getSurname());
-            preparedStatement.setString(3,user.getEmail());
-            preparedStatement.setString(4,user.getPhone());
-            preparedStatement.setString(5,user.getPassword());
-            preparedStatement.setLong(6,user.getIdRole());
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getSurname());
+            preparedStatement.setString(3, user.getEmail());
+            preparedStatement.setString(4, user.getPhone());
+            preparedStatement.setString(5, user.getPassword());
+            preparedStatement.setLong(6, user.getIdRole());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -80,12 +83,12 @@ public class DAOUser {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(INSERT);
-            preparedStatement.setString(1,name);
-            preparedStatement.setString(2,surname);
-            preparedStatement.setString(3,email);
-            preparedStatement.setString(4,phone);
-            preparedStatement.setString(5,password);
-            preparedStatement.setLong(6,idRole);
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, surname);
+            preparedStatement.setString(3, email);
+            preparedStatement.setString(4, phone);
+            preparedStatement.setString(5, password);
+            preparedStatement.setLong(6, idRole);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -94,6 +97,7 @@ public class DAOUser {
         }
         return new ReturnWithMessage(true, "Utente inserito con successo");
     }
+
     public User searchByEmailPassword(Connection connection, String email, String password) throws DAOException {
         User user = null;
         PreparedStatement preparedStatement = null;
@@ -108,7 +112,8 @@ public class DAOUser {
                 String surname = resultSet.getString("cognome");
                 String phone = resultSet.getString("telefono");
                 long id = resultSet.getLong("id");
-                user = new User(id, email, name, surname, phone);
+                Role role = DAORole.getInstance().searchById(connection, resultSet.getLong("id_ruolo"));
+                user = new User(id, email, name, surname, phone, role);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -151,6 +156,49 @@ public class DAOUser {
             throw new DAOException("Impossibile modificare l'email dell'utente, errore DB");
         }
     }
+
+    public ReturnWithMessage modifyAll(Connection connection, User user) throws DAOException {
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(UPDATE_ALL);
+            String name, surname, phone, email;
+            name = user.getName();
+            surname = user.getSurname();
+            email = user.getEmail();
+            phone = user.getPhone();
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, surname);
+            preparedStatement.setString(3, phone);
+            preparedStatement.setString(4, email);
+            preparedStatement.setLong(5, user.getId());
+            preparedStatement.executeUpdate();
+            return new ReturnWithMessage(true, "Modificato con Successo!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ReturnWithMessage(false, "Impossibile modificare i dati dell'utente, errore DB");
+            //throw new DAOException("Impossibile modificare i dati dell'utente, errore DB");
+        }
+    }
+
+    public ReturnWithMessage modifyAllPassword(Connection connection, User user, String password) throws DAOException {
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(UPDATE_ALL_PASSWORD);
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getSurname());
+            preparedStatement.setString(3, user.getPhone());
+            preparedStatement.setString(4, user.getEmail());
+            preparedStatement.setString(5, password);
+            preparedStatement.setLong(6, user.getId());
+            preparedStatement.executeUpdate();
+            return new ReturnWithMessage(true, "Modificato con Successo!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            //throw new DAOException("Impossibile modificare i dati dell'utente, errore DB");
+            return new ReturnWithMessage(false, "Impossibile modificare i dati dell'utente, errore DB");
+        }
+    }
+
     public void modifyEmail(Connection connection, String email, long idUser) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {
@@ -201,6 +249,7 @@ public class DAOUser {
             throw new DAOException("Impossibile eliminare l'utente, errore DB");
         }
     }
+
     public void delete(Connection connection, long id) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {

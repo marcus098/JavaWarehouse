@@ -1,6 +1,7 @@
 package com.example.warehouse.DAO;
 
 import com.example.warehouse.DAO.eccezioni.DAOException;
+import com.example.warehouse.model.Permission;
 import com.example.warehouse.model.Role;
 import com.example.warehouse.model.User;
 import org.springframework.stereotype.Component;
@@ -71,7 +72,8 @@ public class DAORole {
             if (resultSet.next()) {
                 String name = resultSet.getString("nome");
                 String description = resultSet.getString("descrizione");
-                role = new Role(id, name, description);
+                List<Permission> permissionList = DAOPermission.getInstance().searchByRole(connection, resultSet.getLong("id"));
+                role = new Role(id, name, description, permissionList);
             }
         } catch (SQLException e) {
             e.printStackTrace();
