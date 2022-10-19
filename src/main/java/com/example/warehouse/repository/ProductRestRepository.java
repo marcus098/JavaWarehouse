@@ -104,11 +104,11 @@ public class ProductRestRepository {
         return product;
     }
 
-    public ReturnWithMessage addProduct(String name, String description, double priceSell, int quantity, List<Map<String, Object>> listSupplier) {
+    public ReturnWithMessage addProduct(String name, String description, double priceSell, int quantity, List<Map<String, Object>> listSupplier, long idCategory) {
         Connection connection = null;
         connection = dataSource.getConnection();
         try {
-            if(daoProduct.insert(connection, new Product(name, description, priceSell, quantity)).isBool()){
+            if(daoProduct.insert(connection, new Product(name, description, priceSell, quantity), idCategory).isBool()){
                 long idProduct = daoProduct.scopeIdentity(connection);
                 if(idProduct==0)
                     return new ReturnWithMessage(false, "Errore");
@@ -125,5 +125,15 @@ public class ProductRestRepository {
             return new ReturnWithMessage(false, "Errore");
         }
         return new ReturnWithMessage(true, "Successo");
+    }
+
+    public ReturnWithMessage deleteProduct(long idProduct){
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        try {
+            return daoProduct.delete(connection, idProduct);
+        }catch (DAOException exception){
+            return new ReturnWithMessage(false, "Errore");
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,17 +18,24 @@ public class PositionRestController {
     PositionRestService positionRestService;
 
     @GetMapping("/position/{name}/{id}")
-    public List<Position> searchPositionByName(@PathVariable("name") String name, @PathVariable("id") long idProduct) {
-        return positionRestService.searchPositionByName(name, idProduct);
+    public List<Position> searchPositionByName(@PathVariable("name") String name, @PathVariable("id") long idProduct, @RequestHeader(value = "userToken") String token) {
+        if (positionRestService.checkToken(token, 14))
+            return positionRestService.searchPositionByName(name, idProduct);
+        return new ArrayList<>();
     }
+
     @GetMapping("/position/{id}")
-    public List<Position> searchPositionByIdProduct(@PathVariable("id") long idProduct) {
-        return positionRestService.searchPositionByIdProduct(idProduct);
+    public List<Position> searchPositionByIdProduct(@PathVariable("id") long idProduct, @RequestHeader(value = "userToken") String token) {
+        if (positionRestService.checkToken(token, 14))
+            return positionRestService.searchPositionByIdProduct(idProduct);
+        return new ArrayList<>();
     }
 
     @GetMapping("/positions")
-    public List<Position> getPositions(){
-        return positionRestService.getPositions();
+    public List<Position> getPositions(@RequestHeader(value = "userToken") String token) {
+        if (positionRestService.checkToken(token, 14))
+            return positionRestService.getPositions();
+        return new ArrayList<>();
     }
 
     @PostMapping("/position/add")
@@ -35,30 +43,38 @@ public class PositionRestController {
         Gson gson = new Gson();
         Map mapJson = gson.fromJson(jsonString, Map.class);
         Map<String, String> map = mapJson;
-        if (map.containsKey("name"))
-            return positionRestService.addPosition(new Position(map.get("name"), map.get("description")));
-        return new ReturnWithMessage(false, "Dati mancanti");
+        if(positionRestService.checkToken(map.get("userToken").toString(), 14)) {
+            if (map.containsKey("name"))
+                return positionRestService.addPosition(new Position(map.get("name"), map.get("description")));
+            return new ReturnWithMessage(false, "Dati mancanti");
+        }
+        return new ReturnWithMessage(false, "Non hai i permessi");
     }
+
     @PostMapping("/position/updateProduct")
     public ReturnWithMessage updateProductPosition(@RequestBody String jsonString) {
         Gson gson = new Gson();
         Map mapJson = gson.fromJson(jsonString, Map.class);
         Map<String, Long> map = mapJson;
-        if (map.containsKey("idPosition")) {
-            if (map.containsKey("idProduct"))
-                return positionRestService.updateProductPosition(map.get("idPosition"), map.get("idProduct"));
-            return positionRestService.updateProductPositionNull(map.get("idPosition"));
+        if(positionRestService.checkToken(map.get("userToken").toString(), 14)) {
+            if (map.containsKey("idPosition")) {
+                if (map.containsKey("idProduct"))
+                    return positionRestService.updateProductPosition(map.get("idPosition"), map.get("idProduct"));
+                return positionRestService.updateProductPositionNull(map.get("idPosition"));
+            }
         }
-        return new ReturnWithMessage(false, "Dati mancanti");
+        return new ReturnWithMessage(false, "Dati mancanti o autorizzazione neagata");
     }
 
     @PostMapping("/position/delete/{id}")
-    public boolean deletePosition(@PathVariable("id") long id){
-        return positionRestService.deletePosition(id);
+    public boolean deletePosition(@PathVariable("id") long id, @RequestBody Map<String, String> request) {
+        if (positionRestService.checkToken(request.get("userToken"), 14))
+            return positionRestService.deletePosition(id);
+        return false;
     }
 
     @PostMapping("/position/empty/{id}")
-    public boolean emptyPosition(@PathVariable("id") long id){
+    public boolean emptyPosition(@PathVariable("id") long id) {
         return positionRestService.emptyPosition(id);
     }
 

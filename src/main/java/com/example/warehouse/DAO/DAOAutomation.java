@@ -33,10 +33,10 @@ public class DAOAutomation {
             "where id_prodotto = ? \n" +
             "and data > NOW() - INTERVAL ? DAY\n" +
             "and data < NOW() - INTERVAL ? DAY;";*/
-    private static final String GETQUANTITYPERIOD = "select avg(quantita) from acquistoCliente inner join acquistoClienteProdotto on acquistoClienteProdotto.id_acquistoCliente = acquistoCliente.id \n" +
-            "where id_prodotto = 1\n" +
-            "and data > NOW() - INTERVAL 20 DAY\n" +
-            "and data < NOW() - INTERVAL 10 DAY;";
+    private static final String GETQUANTITYPERIOD = "select avg(quantita) as media from acquistoCliente inner join acquistoClienteProdotto on acquistoClienteProdotto.id_acquistoCliente = acquistoCliente.id \n" +
+            "where id_prodotto = ? \n" +
+            "and data > NOW() - INTERVAL ? DAY\n" +
+            "and data < NOW() - INTERVAL ? DAY;";
     private static final String GETAVERAGEPRICESEUPPLIER = "select avg(costo_totale/quantita) as media from ordine\n" +
             "inner join prodottoFornitore on prodottoFornitore.id = id_prodotto_fornitore \n" +
             "where id_prodotto = ? \n" +
@@ -44,7 +44,7 @@ public class DAOAutomation {
     private static final String GETINTERVALLASTORDER = "select DATEDIFF(NOW(), data) as differenza from ordine inner join prodottoFornitore on prodottoFornitore.id = id_prodotto_Fornitore where id_prodotto = ?  order by data desc limit 1;";
     private static final String GETLASTQUANTITYORDER = "select quantita from ordine inner join prodottoFornitore on prodottoFornitore.id = id_prodotto_Fornitore where id_prodotto = ? order by data desc limit 1;";
 
-    private static String GETMINIMUMPRICE = "select min(costo_prodotto) as minimo from prodottoFornitore where id_prodotto = ?";
+    private static String GETMINIMUMPRICE = "select min(costo_prodotto) as minimo, id_fornitore from prodottoFornitore where id_prodotto = ?";
     private static String GETQUANTITYSTOCK = "select quantita from prodotto where id = ?";
     private static String GETPRICESELL = "select prezzoVendita from prodotto where id = ?";
     private static final String GETINTERVALLASTSELL = "select DATEDIFF(NOW(), data) as differenza, data from acquistoClienteProdotto \n" +
@@ -209,6 +209,26 @@ public class DAOAutomation {
             throw new DAOException("Impossibile cercare l'automazione, errore DB");
         }
         return minimum;
+    }
+
+    public long getMinimumPriceSupplier(Connection connection, long idProduct) throws DAOException {
+        long id = 0;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = connection.prepareStatement(GETMINIMUMPRICE);
+            preparedStatement.setLong(1, idProduct);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                long m = resultSet.getLong("id_fornitore");
+                if (m != 0)
+                    id = m;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException("Impossibile cercare l'automazione, errore DB");
+        }
+        return id;
     }
 
     private DAOAutomation() {

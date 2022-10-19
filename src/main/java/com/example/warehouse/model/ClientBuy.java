@@ -11,21 +11,26 @@ public class ClientBuy {
     private LocalDateTime localDateTime;
     private double price;
 
-    public ClientBuy(long id, String description, List<ProductPrice> productPriceList, LocalDateTime localDateTime) {
+    private double discount;
+    public ClientBuy(long id, String description, List<ProductPrice> productPriceList, LocalDateTime localDateTime/*, double discount*/) {
         this.id = id;
         this.description = description;
         this.productPriceList = productPriceList;
         this.localDateTime = localDateTime;
         this.quantity = productPriceList.stream().mapToInt(p -> p.getQuantity()).sum();
-        this.price = productPriceList.stream().mapToDouble(p -> p.getPrice()).sum();
+        this.price = productPriceList.stream().mapToDouble(p -> p.getPrice() - (p.getPrice() * p.getDiscount() / 100)).sum();
+        System.out.println(productPriceList);
+        this.discount = productPriceList.stream().mapToDouble(p -> p.getDiscount()).average().getAsDouble();
     }
 
-    public ClientBuy(String description, List<ProductPrice> productPriceList, LocalDateTime localDateTime) {
+    public ClientBuy(String description, List<ProductPrice> productPriceList, LocalDateTime localDateTime/*, double discount*/) {
         this.description = description;
         this.productPriceList = productPriceList;
         this.localDateTime = localDateTime;
+        this.discount = productPriceList.stream().mapToDouble(p -> p.getDiscount()).average().getAsDouble();
         this.quantity = productPriceList.stream().mapToInt(p -> p.getQuantity()).sum();
-        this.price = productPriceList.stream().mapToDouble(p -> p.getPrice()).sum();
+        System.out.println(productPriceList);
+        this.price = productPriceList.stream().mapToDouble(p -> p.getPrice() - (p.getPrice() * p.getDiscount() / 100)).sum();
     }
 
     public String getDescription() {
@@ -46,6 +51,14 @@ public class ClientBuy {
 
     public double getPrice() {
         return price;
+    }
+
+    public double getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(double discount) {
+        this.discount = discount;
     }
 
     public LocalDateTime getLocalDateTime() {
@@ -80,6 +93,7 @@ public class ClientBuy {
                 ", quantity=" + quantity +
                 ", localDateTime=" + localDateTime +
                 ", price=" + price +
+                ", discount=" + discount +
                 '}';
     }
 }

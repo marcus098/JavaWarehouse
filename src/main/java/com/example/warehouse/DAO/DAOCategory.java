@@ -19,11 +19,15 @@ public class DAOCategory {
     private static DAOCategory instance;
     private static final String INSERT = "INSERT INTO categoria(nome,descrizione) VALUES (?,?)";
     private static final String FIND_BY_NAME = "SELECT * FROM categoria WHERE nome=?";
-    //private static final String FIND_ALL = "SELECT * FROM categoria";
-    private static final String FIND_ALL = "select count(*) as numero, id_categoria as id, categoria.nome, categoria.descrizione from prodotto\n" +
+    private static final String FIND_ALL = "SELECT * FROM categoria";
+    /*private static final String FIND_ALL = "select count(*) as numero, id_categoria as id, categoria.nome, categoria.descrizione from prodotto\n" +
             "inner join categoria on categoria.id = id_categoria\n" +
+            "group by(id_categoria);";*/
+    private static final String FIND_NUMBER = "select count(*) as numero from prodotto where id_categoria = ?";
+    private static final String FIND_ALL_SUPPLIER = "select count(*) as numero, id_categoria as id, categoria.nome, categoria.descrizione from prodotto\n" +
+            "inner join categoria on categoria.id = id_categoria\n" +
+            "inner JOIN prodottoFornitore on prodottoFornitore.id_prodotto = prodotto.id WHERE id_fornitore = ?\n" +
             "group by(id_categoria);";
-    private static final String FIND_ALL_SUPPLIER = "select categoria.id as id, categoria.nome as nome, categoria.descrizione as descrizione from categoria JOIN prodotto on prodotto.id_categoria = categoria.id JOIN prodottoFornitore on prodottoFornitore.id_prodotto = prodotto.id WHERE id_fornitore = ?";
     private static final String FIND_BY_ID = "SELECT * FROM categoria WHERE id = ? LIMIT 1";
     private static final String UPDATE_NAME = "UPDATE categoria SET nome = ? WHERE id= ? LIMIT 1";
     private static final String UPDATE_DESCRIPTION = "UPDATE categoria SET descrizione = ? WHERE id= ?";
@@ -84,7 +88,7 @@ public class DAOCategory {
                 long id = resultSet.getLong("id");
                 String description = resultSet.getString("descrizione");
                 String name = resultSet.getString("nome");
-                int number = resultSet.getInt("numero");
+                int number = searchNumber(connection, id);
                 System.out.println(number);
                 list.add(new Category(id, name, description, number));
             }
@@ -93,6 +97,24 @@ public class DAOCategory {
             throw new DAOException("Impossibile cercare le categorie, errore DB");
         }
         return list;
+    }
+
+    public int searchNumber(Connection connection, long id) throws DAOException {
+        int number = 0;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = connection.prepareStatement(FIND_NUMBER);
+            preparedStatement.setLong(1, id);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                number = resultSet.getInt("numero");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException("Impossibile cercare il numero dei prodotti, errore DB");
+        }
+        return number;
     }
 
     public Category searchById(Connection connection, long id) throws DAOException {

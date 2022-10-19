@@ -5,11 +5,9 @@ import com.example.warehouse.model.Role;
 import com.example.warehouse.model.User;
 import com.example.warehouse.service.UserRestService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -59,27 +57,67 @@ public class UserRestController {
 
     @PostMapping("/user/add")
     public ReturnWithMessage addUser(@RequestBody Map<String, String> request) {
-        if (request.containsKey("name") && request.containsKey("surname") && request.containsKey("phone") && request.containsKey("email") && request.containsKey("password") && request.containsKey("role")) {
-            if (request.get("name").trim() != "" && request.get("surname").trim() != "" && request.get("phone").trim() != "" && request.get("email").trim() != "" && request.get("password").trim() != "" && request.get("role").trim() != "") {
-                long role = Long.parseLong(request.get("role"));
-                return userRestService.addUser(request.get("name"), request.get("surname"), request.get("email"), request.get("phone"), request.get("password"), role);
+        if(userRestService.checkToken(request.get("userToken"), 12).isBool()) {
+            if (request.containsKey("name") && request.containsKey("surname") && request.containsKey("phone") && request.containsKey("email") && request.containsKey("password") && request.containsKey("role")) {
+                if (request.get("name").trim() != "" && request.get("surname").trim() != "" && request.get("phone").trim() != "" && request.get("email").trim() != "" && request.get("password").trim() != "" && request.get("role").trim() != "") {
+                    long role = Long.parseLong(request.get("role"));
+                    return userRestService.addUser(request.get("name"), request.get("surname"), request.get("email"), request.get("phone"), request.get("password"), role);
+                } else {
+                    return new ReturnWithMessage(false, "Presenti dei campi vuoti");
+                }
             } else {
-                return new ReturnWithMessage(false, "Presenti dei campi vuoti");
+                return new ReturnWithMessage(false, "Dati mancanti");
             }
-        } else {
-            return new ReturnWithMessage(false, "Dati mancanti");
+        }else{
+            return new ReturnWithMessage(false, "Non hai i permessi");
         }
+    }
+
+    @GetMapping("/user/delete/{id}")
+    public ReturnWithMessage removeUser(@PathVariable("id") long id, @RequestHeader(value="userToken") String token){
+        if(userRestService.checkToken(token, 9).isBool())
+            return userRestService.removeUser(id);
+        else
+            return userRestService.checkToken(token, 9);
+    }
+
+    @PostMapping("/getRole")
+    public ReturnWithMessage getRole(@RequestBody Map<String, String> request){
+        String token = request.get("token");
+        if(userRestService.checkToken(token) == 0){
+            return userRestService.getRole(token);
+        }else{
+            return new ReturnWithMessage(false, "Utente non loggato");
+        }
+    }
+
+    @PostMapping("/user/modify/{id}")
+    public ReturnWithMessage modifyUser(@PathVariable("id") long idUser, @RequestBody Map<String, String> request){
+        String token = request.get("userToken");
+        String name = request.get("name");
+        String surname = request.get("surname");
+        String email = request.get("email");
+        String phone = request.get("phone");
+        Double d = Double.parseDouble(request.get("idRole"));
+        long idRole = d.longValue();
+        if(userRestService.checkToken(token, 9).isBool())
+            return userRestService.modifyUser(idUser, name, surname, email, phone, idRole);
+        else
+            return userRestService.checkToken(token, 9);
     }
 
     @PostMapping("/users")
     public List<User> getUsers(@RequestBody Map<String, String> request) {
         String token = request.get("token");
-        User user = userRestService.getUserByToken(token);
-        if (user == null) {
-            return null;
-        } else {
-            return userRestService.getUsers(user.getId());
+        if(userRestService.checkToken(token, 9).isBool()) {
+            User user = userRestService.getUserByToken(token);
+            if (user == null) {
+                return null;
+            } else {
+                return userRestService.getUsers(user.getId());
+            }
         }
+        return new ArrayList<>();
     }
 
     @PostMapping("/getUser")

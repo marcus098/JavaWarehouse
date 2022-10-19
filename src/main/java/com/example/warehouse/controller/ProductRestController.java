@@ -62,8 +62,21 @@ public class ProductRestController {
         double priceSell = d.doubleValue();
         Integer i = Integer.parseInt(map.get("quantity").toString());
         int quantity = i.intValue();
+        Double d1 = Double.parseDouble(map.get("category").toString());
+        long idCategory = d1.longValue();
         List<Map<String, Object>> listSupplier = (List) map.get("suppliersToSave");
-        return productRestService.addProduct(map.get("name").toString(), map.get("description").toString(), priceSell, quantity, listSupplier);
+        String token = map.get("userToken").toString();
+        if(productRestService.checkToken(token, 6))
+            return productRestService.addProduct(map.get("name").toString(), map.get("description").toString(), priceSell, quantity, listSupplier, idCategory);
+        return new ReturnWithMessage(false, "Non hai i permessi");
+    }
+
+    @PostMapping("/product/delete/{id}")
+    public ReturnWithMessage deleteProduct(@PathVariable("id") long id, @RequestBody Map<String, String> request){
+        if(productRestService.checkToken(request.get("userToken"), 6)){
+            return productRestService.deleteProduct(id);
+        }
+        return new ReturnWithMessage(false, "Non hai i permessi");
     }
 
 }

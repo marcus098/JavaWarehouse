@@ -34,13 +34,13 @@ public class PurchaseRestRepository {
         return list;
     }
 
-    public boolean sell(List<Cart> cartList){
+    public boolean sell(List<Cart> cartList, String description){
         ClientBuy clientBuy;
         Connection connection = null;
         connection = dataSource.getConnection();
         boolean value = false;
         try {
-            value = DAOClientBuy.getInstance().insert(connection, "");
+            value = DAOClientBuy.getInstance().insert(connection, description);
             if(value){
                 value = DAOClientBuy.getInstance().insertProducts(connection, cartList);
             }

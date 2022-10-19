@@ -1,6 +1,7 @@
 package com.example.warehouse.repository;
 
 import com.example.warehouse.DAO.DAOAutomation;
+import com.example.warehouse.DAO.DAOOrder;
 import com.example.warehouse.DAO.DataSource;
 import com.example.warehouse.DAO.eccezioni.DAOException;
 import com.example.warehouse.model.Automation;
@@ -192,7 +193,7 @@ public class AutomationRestRepository {
             //database per intervallo giorni
             try {
                 daysInterval = daoAutomation.getIntervalSell(connection, productId);
-            }catch (DAOException e){
+            } catch (DAOException e) {
                 return 0;
             }
             //fine
@@ -223,7 +224,7 @@ public class AutomationRestRepository {
                 try {
                     priceSell = daoAutomation.priceSell(connection, productId);
                     avaragePriceSupplier = daoAutomation.searchAverageSupplier(connection, productId);
-                }catch (DAOException e){
+                } catch (DAOException e) {
                     return 0;
                 }
                 //fine
@@ -241,7 +242,7 @@ public class AutomationRestRepository {
                 return (100 - ((100 * (priceSell - partialDiscount)) / priceSell));
             }
         } else {//Non attivo
-            return -1;
+            return 0;
         }
     }
 
@@ -255,61 +256,75 @@ public class AutomationRestRepository {
         double priceSell = 0;
         int intervalLastOrder = 0;
         int lastQuantityOrder = 0;
+        long minQuantityForOrder = automationList.get(1).getStocksRulesList().get(0).getNumber();
+        long maxQuantityForOrder = automationList.get(1).getStocksRulesList().get(1).getNumber();
         Connection connection = null;
         connection = dataSource.getConnection();
         try {
-            double averageFirstMonth = 0, averageSecondMonth = 0;
-            //punto a: quantia' media venduta ogni 10 giorni gli ultimi 2 mesi (ottengo 6 medie)
-            for (int i = 0; i < medieQuantitySell.length; i++) {
-                medieQuantitySell[i] = DAOAutomation.getInstance().searchQuantityByInterval(connection, (10 * i) + 10, (10 * i), productId);
-                finalAverageQuantitySell += medieQuantitySell[i];
-                if (i < 3)
-                    averageFirstMonth += medieQuantitySell[i];
-                else
-                    averageSecondMonth += medieQuantitySell[i];
-            }
-
-            //punto b: media relativa alle 6 medie ottenute sopra
-            finalAverageQuantitySell = finalAverageQuantitySell / 6;
-
-            //punto c: media crescente o descrescente
-            averageFirstMonth = averageFirstMonth / 3;
-            averageSecondMonth = averageSecondMonth / 3;
-            if (averageSecondMonth > averageFirstMonth)
-                averageSellGrowing = true;
-
-            //punto d: costo medio prezzo fornitore relativo agli ordini degli ultimi 2 mesi
-            double d = DAOAutomation.getInstance().searchAverageSupplier(connection, productId);
-            if (d != 0)
-                averagePriceSupplier = d;
-            //punto e: costo minimo tra fornitori
-            minimumPriceSupplier = DAOAutomation.getInstance().getMinimumPrice(connection, productId);
-
             //punto f: calcolo quantita presente in magazzino
             quantityStock = DAOAutomation.getInstance().quantityStock(connection, productId);
 
-            //punto g: calcolo prezzo di vendita al cliente del prodotto
-            priceSell = DAOAutomation.getInstance().priceSell(connection, productId);
+            if (quantityStock <= minQuantityForOrder) {
 
-            //punto h: ultima quantità venduta
-            lastQuantityOrder = DAOAutomation.getInstance().getLastQuantityOrder(connection, productId);
+                //punto e: costo minimo tra fornitori
+                minimumPriceSupplier = DAOAutomation.getInstance().getMinimumPrice(connection, productId);
+                long idSupplier = DAOAutomation.getInstance().getMinimumPriceSupplier(connection, productId);
+                //punto g: calcolo prezzo di vendita al cliente del prodotto
+                priceSell = DAOAutomation.getInstance().priceSell(connection, productId);
+                if (priceSell <= minimumPriceSupplier)
+                    return;
 
-            //punto i: ultimo ordine di quel prodotto
-            intervalLastOrder = DAOAutomation.getInstance().getIntervalOrder(connection, productId);
+                double averageFirstMonth = 0, averageSecondMonth = 0;
+                //punto a: quantia' media venduta ogni 10 giorni gli ultimi 2 mesi (ottengo 6 medie)
+                for (int i = 0; i < medieQuantitySell.length; i++) {
+                    medieQuantitySell[i] = DAOAutomation.getInstance().searchQuantityByInterval(connection, (10 * i) + 10, (10 * i), productId);
+                    finalAverageQuantitySell += medieQuantitySell[i];
+                    if (i < 3)
+                        averageFirstMonth += medieQuantitySell[i];
+                    else
+                        averageSecondMonth += medieQuantitySell[i];
+                }
 
-            System.out.println("Medie: ");
-            System.out.println(medieQuantitySell[0] + " " + medieQuantitySell[1] + " " + medieQuantitySell[2] + " " + medieQuantitySell[3] + " " + medieQuantitySell[4] + " " + medieQuantitySell[5]);
-            System.out.println("-----------");
-            System.out.println("media primo mese: " + averageFirstMonth);
-            System.out.println("media secondo mese: " + averageSecondMonth);
-            System.out.println("Media crescente: " + averageSellGrowing);
-            System.out.println("media prezzo fornitore: " + averagePriceSupplier);
-            System.out.println("Media final: " + finalAverageQuantitySell);
-            System.out.println("minimo prezzo fornitore: " + minimumPriceSupplier);
-            System.out.println("quantita' in magazzino: " + quantityStock);
-            System.out.println("prezzo di vendita: " + priceSell);
-            System.out.println("ultima quantita' ordinata: " + lastQuantityOrder);
-            System.out.println("Intervallo giorni da ultimo ordine: " + intervalLastOrder);
+                //punto b: media relativa alle 6 medie ottenute sopra
+                finalAverageQuantitySell = finalAverageQuantitySell / 6;
+                Double qty = averageFirstMonth * 1.2;
+                //punto c: media crescente o descrescente
+                averageFirstMonth = averageFirstMonth / 3;
+                averageSecondMonth = averageSecondMonth / 3;
+                if (averageSecondMonth > averageFirstMonth) {
+                    averageSellGrowing = true;
+                }else{
+                    qty -= qty * 0.4;
+                }
+
+                //punto d: costo medio prezzo fornitore relativo agli ordini degli ultimi 2 mesi
+                double d = DAOAutomation.getInstance().searchAverageSupplier(connection, productId);
+                if (d != 0)
+                    averagePriceSupplier = d;
+
+                //punto h: ultima quantità venduta
+                lastQuantityOrder = DAOAutomation.getInstance().getLastQuantityOrder(connection, productId);
+
+                //punto i: ultimo ordine di quel prodotto
+                intervalLastOrder = DAOAutomation.getInstance().getIntervalOrder(connection, productId);
+
+                System.out.println("Medie: ");
+                System.out.println(medieQuantitySell[0] + " " + medieQuantitySell[1] + " " + medieQuantitySell[2] + " " + medieQuantitySell[3] + " " + medieQuantitySell[4] + " " + medieQuantitySell[5]);
+                System.out.println("-----------");
+                System.out.println("media primo mese: " + averageFirstMonth);
+                System.out.println("media secondo mese: " + averageSecondMonth);
+                System.out.println("Media crescente: " + averageSellGrowing);
+                System.out.println("media prezzo fornitore: " + averagePriceSupplier);
+                System.out.println("Media final: " + finalAverageQuantitySell);
+                System.out.println("minimo prezzo fornitore: " + minimumPriceSupplier);
+                System.out.println("quantita' in magazzino: " + quantityStock);
+                System.out.println("prezzo di vendita: " + priceSell);
+                System.out.println("ultima quantita' ordinata: " + lastQuantityOrder);
+                System.out.println("Intervallo giorni da ultimo ordine: " + intervalLastOrder);
+                System.out.println("QTY: " + qty);
+                if(qty>1)
+                    DAOOrder.getInstance().insert(connection, "Ordine Automatico", idSupplier, productId, qty.intValue());
+            }
         } catch (DAOException e) {
             return;
         }

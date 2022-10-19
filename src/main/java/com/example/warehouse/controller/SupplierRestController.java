@@ -29,7 +29,10 @@ public class SupplierRestController {
         String api = "";
         if(request.containsKey("api"))
             api = request.get("api");
-        return supplierRestService.addSupplier(request.get("name"), request.get("email"), request.get("phone"), api);
+        if(supplierRestService.checkToken(request.get("userToken"), 13)) {
+            return supplierRestService.addSupplier(request.get("name"), request.get("email"), request.get("phone"), api);
+        }
+        return false;
     }
 
     @PostMapping("/suppliers/getProduct/{idProduct}")

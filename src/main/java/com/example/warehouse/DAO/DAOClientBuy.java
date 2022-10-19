@@ -16,14 +16,15 @@ import java.util.List;
 public class DAOClientBuy {
     private static DAOClientBuy instance;
     private static final String INSERT = "INSERT INTO acquistoCliente(data,descrizione) VALUES (NOW(),?)";
-    private static final String INSERT_PRODUCTS = "INSERT INTO acquistoClienteProdotto(id_acquistoCliente, id_prodotto, prezzoProdotto, quantita, sconto) VALUES (?,?,?,?,0)";
+    private static final String INSERT_PRODUCTS = "INSERT INTO acquistoClienteProdotto(id_acquistoCliente, id_prodotto, prezzoProdotto, quantita, sconto) VALUES (?,?,?,?,?)";
 
     private static final String FIND_BY_DATE = "SELECT * FROM acquistoCliente JOIN acquistoClienteProdotto ON acquistoClienteProdotto.id_cliente = acquistoProdotto.id WHERE data>=? AND data<=?";
+    //private static final String FIND_DISCOUNT = "SELECT sconto FROM acquistoClienteProdotto ON acquistoClienteProdotto.id_cliente = acquistoProdotto.id WHERE data>=? AND data<=?";
     private static final String FIND_PRODUCTS = "SELECT * FROM acquistoClienteProdotto where id_acquistoCliente = ?";
     private static final String SCOPE_IDENTITY = "select @@identity;";
     private static final String FIND_BY_ID = "SELECT * FROM acquistoCliente JOIN acquistoClienteProdotto ON acquistoClienteProdotto.id_acquistoCliente = acquistoCliente.id WHERE acquistoCliente.id = ? LIMIT 1";
     //private static final String FIND_ALL = "SELECT * FROM acquistoCliente JOIN acquistoClienteProdotto ON acquistoClienteProdotto.id_acquistoCliente = acquistoCliente.id LIMIT 1";
-    private static final String FIND_ALL = "SELECT * FROM acquistoCliente";
+    private static final String FIND_ALL = "SELECT * FROM acquistoCliente order by data desc";
     private static final String UPDATE_DESCRIPTION = "UPDATE acquistoCliente SET email = ? WHERE id= ? LIMIT 1";
     private static final String DELETE = "DELETE FROM acquistoCliente WHERE id = ?";
     private static final String FIND_SELLS_MONTHS_TOTAL = "select date_format(data, '%m') as mese,sum(quantita) as quantitaTot, sum(prezzoProdotto*quantita*((100-sconto)/100)) as totale \n" +
@@ -83,6 +84,7 @@ public class DAOClientBuy {
                 preparedStatement.setLong(2, c.getId());
                 preparedStatement.setDouble(3, c.getPrice());
                 preparedStatement.setInt(4, c.getQuantity());
+                preparedStatement.setDouble(5, c.getDiscount());
                 preparedStatement.executeUpdate();
                 boolean value = DAOProduct.getInstance().modifyQuantity(connection,c.getId(),c.getQuantity(),"minus");
                 if(value==false)
@@ -108,6 +110,8 @@ public class DAOClientBuy {
             while (resultSet.next()) {
                 int quantity = resultSet.getInt("quantita");
                 double discount = resultSet.getDouble("sconto");
+                if(discount!=0)
+                    System.out.println("Sconto: " + discount);
                 double priceSell = resultSet.getDouble("prezzoProdotto");
                 long id = resultSet.getLong("id");
                 Product product = DAOProduct.getInstance().searchById(connection, resultSet.getLong("id_prodotto"));
@@ -117,6 +121,7 @@ public class DAOClientBuy {
             e.printStackTrace();
             throw new DAOException("Impossibile cercare il prodotto, errore DB");
         }
+        System.out.println(list);
         return list;
     }
 
@@ -129,8 +134,8 @@ public class DAOClientBuy {
             preparedStatement = connection.prepareStatement(FIND_ALL);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                //double discount = resultSet.getDouble("sconto");
                 long id = resultSet.getLong("acquistoCliente.id");
+                //double discount = searchDiscount(connection, id);
                 String description = resultSet.getString("descrizione");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("data"), formatter);
                 //Product product = DAOProduct.getInstance().searchById(connection, resultSet.getLong("id_prodotto"));
@@ -143,6 +148,24 @@ public class DAOClientBuy {
         return list;
     }
 
+   /* public double searchDiscount(Connection connection, long id) throws DAOException{
+        double discount = 0;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = connection.prepareStatement(FIND_DISCOUNT);
+            preparedStatement.setLong(1, id);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                discount = resultSet.getDouble("sconto");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException("Impossibile cercare l'ordine, errore DB");
+        }
+        return discount;
+    }*/
+
     public ClientBuy searchById(Connection connection, long id) throws DAOException {
         ClientBuy clientBuy = null;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -153,11 +176,12 @@ public class DAOClientBuy {
             preparedStatement.setLong(1, id);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                double discount = resultSet.getDouble("sconto");
+                //double discount = resultSet.getDouble("sconto");
                 String description = resultSet.getString("descrizione");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("data"), formatter);
                 Product product = DAOProduct.getInstance().searchById(connection, resultSet.getLong("id_prodotto"));
-                clientBuy = new ClientBuy(id, description, searchProducts(connection, id), date);
+                clientBuy = new ClientBuy(id, description, searchProducts(connection, id), date/*, discount*/);
+                System.out.println(clientBuy);
             }
         } catch (SQLException e) {
             e.printStackTrace();

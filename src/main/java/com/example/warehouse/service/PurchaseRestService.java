@@ -33,8 +33,8 @@ public class PurchaseRestService {
         return purchaseRestRepository.getPurchases(id);
     }
 
-    public ReturnWithMessage sell(List<Cart> cartList) {
-        if(purchaseRestRepository.sell(cartList))
+    public ReturnWithMessage sell(List<Cart> cartList, String description) {
+        if(purchaseRestRepository.sell(cartList, description))
             return new ReturnWithMessage(true, "Vendita registrata con successo");
         return new ReturnWithMessage(false, "Errore vendita");
     }

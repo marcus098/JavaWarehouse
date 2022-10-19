@@ -27,7 +27,7 @@ public class DAOUser {
     private static final String UPDATE_NAME = "UPDATE utente SET nome = ? WHERE id= ?";
     private static final String UPDATE_SURNAME = "UPDATE utente SET cognome = ? WHERE id= ?";
     private static final String UPDATE_PHONE = "UPDATE utente SET telefono = ? WHERE id= ?";
-    private static final String UPDATE_ALL = "UPDATE utente SET nome = ?, cognome=?, telefono=?,email=? WHERE id= ?";
+    private static final String UPDATE_ALL = "UPDATE utente SET nome = ?, cognome=?, telefono=?,email=?, id_ruolo = ? WHERE id= ?";
     private static final String UPDATE_ALL_PASSWORD = "UPDATE utente SET nome = ?, cognome=?, telefono=?,email=?, password=? WHERE id= ?";
     private static final String UPDATE_ROLE = "UPDATE utente SET id_ruolo = ? WHERE id= ?";
     private static final String DELETE = "DELETE FROM utente WHERE id = ?";
@@ -156,7 +156,7 @@ public class DAOUser {
             throw new DAOException("Impossibile modificare l'email dell'utente, errore DB");
         }
     }
-
+//nome = ?, cognome=?, telefono=?,email=?, id_ruolo = ?
     public ReturnWithMessage modifyAll(Connection connection, User user) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {
@@ -170,9 +170,10 @@ public class DAOUser {
             preparedStatement.setString(2, surname);
             preparedStatement.setString(3, phone);
             preparedStatement.setString(4, email);
-            preparedStatement.setLong(5, user.getId());
+            preparedStatement.setLong(5, user.getIdRole());
+            preparedStatement.setLong(6, user.getId());
             preparedStatement.executeUpdate();
-            return new ReturnWithMessage(true, "Modificato con Successo!");
+            return new ReturnWithMessage(true, "Modificato con Successo!", user);
         } catch (SQLException e) {
             e.printStackTrace();
             return new ReturnWithMessage(false, "Impossibile modificare i dati dell'utente, errore DB");
@@ -238,27 +239,30 @@ public class DAOUser {
         }
     }
 
-    public void delete(Connection connection, User user) throws DAOException {
+    public ReturnWithMessage delete(Connection connection, User user) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(DELETE);
             preparedStatement.setLong(1, user.getId());
             preparedStatement.executeUpdate();
+            return new ReturnWithMessage(true, "Utente eliminato con successo");
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new DAOException("Impossibile eliminare l'utente, errore DB");
+            return new ReturnWithMessage(false, "Impossibile eliminare l'utente, errore DB");
+            //throw new DAOException("Impossibile eliminare l'utente, errore DB");
         }
     }
 
-    public void delete(Connection connection, long id) throws DAOException {
+    public ReturnWithMessage delete(Connection connection, long id) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(DELETE);
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
+            return new ReturnWithMessage(true, "Utente eliminato con successo!");
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new DAOException("Impossibile eliminare l'utente, errore DB");
+            return new ReturnWithMessage(false, "Impossibile eliminare l'utente, errore DB");
         }
     }
 

@@ -6,15 +6,17 @@ public class Cart {
     private String name;
     //private double quantity;
     private int quantity;
+    private double discount;
     private double price;
     private String userToken;
 
-    public Cart(double id, String name, double quantity, double price, String userToken) {
+    public Cart(double id, String name, double quantity, double price, String userToken, double discount) {
         this.id = (long) id;
         this.name = name;
         this.quantity = (int) quantity;
         this.price = price;
         this.userToken = userToken;
+        this.discount = discount;
     }
 
     public double getPrice() {
@@ -23,6 +25,14 @@ public class Cart {
 
     public String getUserToken() {
         return userToken;
+    }
+
+    public double getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(double discount) {
+        this.discount = discount;
     }
 
     public String getName() {

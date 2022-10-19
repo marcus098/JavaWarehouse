@@ -1,14 +1,13 @@
 package com.example.warehouse.repository;
 
+import com.example.warehouse.DAO.DAORole;
 import com.example.warehouse.DAO.DAOUser;
 import com.example.warehouse.DAO.DataSource;
 import com.example.warehouse.DAO.eccezioni.DAOException;
-import com.example.warehouse.model.ReturnWithMessage;
-import com.example.warehouse.model.Supplier;
-import com.example.warehouse.model.Token;
-import com.example.warehouse.model.User;
+import com.example.warehouse.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.sql.Connection;
 import java.util.*;
@@ -55,12 +54,14 @@ public class UserRestRepository {
                         }
                     }
                 }
+                System.out.println(user);
                 mapReturn.put("accessToken", userToken.getValue());
-                if (userList.stream().filter(user1 -> user.getId() == user.getId()).findFirst().isEmpty()) {
+                if (userList.stream().filter(user1 -> user1.getId() == user.getId()).findFirst().isEmpty()) {
                     user.addToken(userToken);
                     userList.add(user);
                 } else {
-                    userList.stream().filter(user1 -> user.getId() == user.getId()).findFirst().get().addToken(userToken);
+                    userList.stream().filter(user1 -> user1.getId() == user.getId()).findFirst().get().addToken(userToken);
+
                 }
             } else {
                 mapReturn.put("error", "Credenziali errate");
@@ -106,9 +107,56 @@ public class UserRestRepository {
         Optional<User> userOptional = userList.stream()
                 .filter(user -> user.checkToken(token) == true)
                 .findFirst();
+        System.out.println(token + " ----- ");
+        userList.stream().forEach(user -> System.out.println(user.getTokenList()));
         if (userOptional.isEmpty())
             return 1;
         return 0;
+    }
+
+    public ReturnWithMessage removeUser(long id) {
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        try {
+            return daoUser.delete(connection, id);
+        } catch (DAOException e) {
+            return new ReturnWithMessage(false, "Errore");
+        }
+    }
+
+    public ReturnWithMessage modifyUser(long id, String name, String surname, String email, String phone, long idRole) {
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        try {
+            ReturnWithMessage r = daoUser.modifyAll(connection, new User(email, name, surname, phone, idRole, id));
+            if (r.isBool()) {
+                User user = (User) r.getObject();
+                Role role = DAORole.getInstance().searchById(connection, user.getIdRole());
+                Optional<User> optionalUser = userList.stream().filter(user1 -> user1.getId() == user.getId()).findFirst();
+                if(optionalUser.isPresent()){
+                    optionalUser.get().setPhone(user.getPhone());
+                    optionalUser.get().setSurname(user.getSurname());
+                    optionalUser.get().setName(user.getName());
+                    optionalUser.get().setEmail(user.getEmail());
+                    optionalUser.get().setRole(role);
+                }
+                return new ReturnWithMessage(true, "Dati modificati con successo");
+            } else {
+                return new ReturnWithMessage(false, "Errore");
+            }
+        } catch (DAOException e) {
+            return new ReturnWithMessage(false, "Errore");
+        }
+    }
+
+    public ReturnWithMessage getRole(String token){
+        Role role = userList
+                .stream()
+                .filter(
+                        user -> user.checkToken(token)
+                )
+                .findFirst().get().getRole();
+        return new ReturnWithMessage(true, "", role);
     }
 
     public ReturnWithMessage checkToken(String token, int page) {

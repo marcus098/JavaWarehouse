@@ -56,7 +56,11 @@ public class ProductRestService {
         return productRestRepository.moreOrder();
     }
 
-    public ReturnWithMessage addProduct(String name, String description, double priceSell, int quantity, List<Map<String, Object>> listSupplier){
-        return productRestRepository.addProduct(name, description, priceSell, quantity, listSupplier);
+    public ReturnWithMessage addProduct(String name, String description, double priceSell, int quantity, List<Map<String, Object>> listSupplier, long idCategory){
+        return productRestRepository.addProduct(name, description, priceSell, quantity, listSupplier, idCategory);
+    }
+
+    public ReturnWithMessage deleteProduct(long id){
+        return productRestRepository.deleteProduct(id);
     }
 }

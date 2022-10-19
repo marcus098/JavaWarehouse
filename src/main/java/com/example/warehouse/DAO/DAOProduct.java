@@ -37,13 +37,13 @@ public class DAOProduct {
     private static final String UPDATE_POSIZIONE = "UPDATE prodotto SET id_posizione = ? WHERE id= ?";
     private static final String UPDATE_CATEGORIA = "UPDATE prodotto SET id_categoria = ? WHERE id= ?";
     private static final String SCOPE_IDENTITY = "select @@identity;";
-    private static final String DELETE = "DELETE FROM product WHERE id = ?";
+    private static final String DELETE = "DELETE FROM prodotto WHERE id = ?";
 
     private DAOProduct() {
         super();
     }
 
-    public ReturnWithMessage insert(Connection connection, Product product) throws DAOException {
+    public ReturnWithMessage insert(Connection connection, Product product, long idCategory) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(INSERT);
@@ -51,7 +51,7 @@ public class DAOProduct {
             preparedStatement.setInt(2, product.getQuantity());
             preparedStatement.setString(3, product.getDescription());
             preparedStatement.setDouble(4, product.getPriceSell());
-            preparedStatement.setLong(5, product.getCategory().getId());
+            preparedStatement.setLong(5, idCategory);
             preparedStatement.executeUpdate();
             return new ReturnWithMessage(true, "Prodotto aggiunto con successo");
         } catch (SQLException e) {
@@ -389,6 +389,18 @@ public class DAOProduct {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DAOException("Impossibile eliminare il prodotto, errore DB");
+        }
+    }
+    public ReturnWithMessage delete(Connection connection, long idProduct) throws DAOException {
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(DELETE);
+            preparedStatement.setLong(1, idProduct);
+            preparedStatement.executeUpdate();
+            return new ReturnWithMessage(true, "Eliminato con successo");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ReturnWithMessage(false, "Errore DB");
         }
     }
 

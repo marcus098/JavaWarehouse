@@ -50,6 +50,10 @@ public class ProductPrice {
         return id;
     }
 
+    public void setDiscount(double discount) {
+        this.discount = discount;
+    }
+
     public void setProduct(Product product) {
         this.product = product;
     }
@@ -63,6 +67,7 @@ public class ProductPrice {
         return "ProductPrice{" +
                 "product=" + product +
                 ", price=" + price +
+                ", discount=" + discount +
                 '}';
     }
 }

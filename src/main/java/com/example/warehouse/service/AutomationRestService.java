@@ -7,6 +7,7 @@ import com.example.warehouse.model.DiscountRules;
 import com.example.warehouse.model.ReturnWithMessage;
 import com.example.warehouse.model.StocksRules;
 import com.example.warehouse.repository.AutomationRestRepository;
+import com.example.warehouse.repository.UserRestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,12 @@ import java.util.Optional;
 public class AutomationRestService {
     @Autowired
     private AutomationRestRepository automationRestRepository;
+    @Autowired
+    private UserRestRepository userRestRepository;
+
+    public boolean checkToken(String token, int page){
+        return userRestRepository.checkToken(token, page).isBool();
+    }
 
     public List<Automation> getAutomations(){
         return automationRestRepository.getAutomations();
