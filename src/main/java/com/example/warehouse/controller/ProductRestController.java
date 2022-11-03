@@ -21,38 +21,38 @@ public class ProductRestController {
     private ProductRestService productRestService;
     @Autowired
     private UserRestRepository userRestRepository;
-
+    @CrossOrigin
     @GetMapping("/productscat/{idCategory}/{idSupplier}")
     public List<Product> getProductsByCategory(@PathVariable("idCategory") long idCategory, @PathVariable("idSupplier") long idSupplier) {
         return productRestService.getProductsByCategory(idCategory, idSupplier);
     }
-
+    @CrossOrigin
     @GetMapping("/products/{name}/{idSupplier}")
     public List<Product> getProductsByName(@PathVariable("name") String name, @PathVariable("idSupplier") long idSupplier) {
         return productRestService.getProductsByName(name, idSupplier);
     }
-
+    @CrossOrigin
     @GetMapping("/products/{name}/{min}/{idSupplier}")
     public List<Product> getProductsByName(@PathVariable("name") String name, @PathVariable("min") double min, @PathVariable("idSupplier") long idSupplier) {
         return productRestService.getProductsByName(name, min, idSupplier);
     }
-
+    @CrossOrigin
     @GetMapping("/products/{name}/{min}/{max}/{idSupplier}")
     public List<Product> getProductsByName(@PathVariable("name") String name, @PathVariable("min") double min, @PathVariable("max") double max, @PathVariable("idSupplier") long idSupplier) {
         return productRestService.getProductsByName(name, min, max, idSupplier);
     }
-
+    @CrossOrigin
     @GetMapping("/products/moreOrder")
     public Product moreOrder() {
 
         return productRestService.moreOrder();
     }
-
+    @CrossOrigin
     @GetMapping("/products/moreSell")
     public Product moreSell() {
         return productRestService.moreSell();
     }
-
+    @CrossOrigin
     @PostMapping("/products/add")
     public ReturnWithMessage addProduct(@RequestBody String jsonString) {
         Gson gson = new Gson();
@@ -70,7 +70,7 @@ public class ProductRestController {
             return productRestService.addProduct(map.get("name").toString(), map.get("description").toString(), priceSell, quantity, listSupplier, idCategory);
         return new ReturnWithMessage(false, "Non hai i permessi");
     }
-
+    @CrossOrigin
     @PostMapping("/product/delete/{id}")
     public ReturnWithMessage deleteProduct(@PathVariable("id") long id, @RequestBody Map<String, String> request){
         if(productRestService.checkToken(request.get("userToken"), 6)){

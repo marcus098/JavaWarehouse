@@ -16,21 +16,21 @@ import java.util.Map;
 public class PurchaseRestController {
     @Autowired
     private PurchaseRestService purchaseRestService;
-
+    @CrossOrigin
     @GetMapping("/purchases")
     public List<ClientBuy> getPurchases(@RequestHeader(value = "userToken") String token) {
         if (purchaseRestService.checkToken(token, 5))
             return purchaseRestService.getPurchases();
         return new ArrayList<>();
     }
-
+    @CrossOrigin
     @GetMapping("/purchases/{id}")
     public ClientBuy getPurchases(@PathVariable("id") long id, @RequestHeader(value = "userToken") String token) {
         if (purchaseRestService.checkToken(token, 5))
             return purchaseRestService.getPurchases(id);
         return null;
     }
-
+    @CrossOrigin
     @PostMapping("/sell")
     public ReturnWithMessage sell(@RequestBody Map<String, List<Cart>> cart, @RequestHeader(value = "userToken") String token,@RequestHeader(value = "description") String description /*@RequestHeader Map<String, String> headers*/) {
         if (purchaseRestService.checkToken(token, 5)) {
@@ -41,7 +41,7 @@ public class PurchaseRestController {
             return new ReturnWithMessage(false, "Errore Utente");
         }
     }
-
+    @CrossOrigin
     @GetMapping("/sells/Months")
     public List<Statistics> searchQuantitySellsMonths() {
         return purchaseRestService.searchQuantitySellsMonths();

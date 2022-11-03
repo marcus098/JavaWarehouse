@@ -30,21 +30,27 @@ public class AutomationRestController {
         }
         return new ReturnWithMessage(true, "", automationRestService.getAutomations());
     }*/
+    @CrossOrigin
     @GetMapping("/discount/{id}")
     public void DiscountManagement(@PathVariable("id") long id) {
         automationRestService.DiscountManagement(id);
     }
-
+    @CrossOrigin
+    @GetMapping("/")
+    public String Prova(){
+        return "Ciao!";
+    }
+    @CrossOrigin
     @PostMapping("/auto")
     public List<Automation> list(@RequestBody Map<String, String> request) {
         //automationRestService.getAutomations();
         String token = request.get("userToken").toString();
-        System.out.println("token: " + token);
+        //System.out.println("token: " + token);
         if (automationRestService.checkToken(token, 15))
             return automationRestService.auto();
         return new ArrayList<>();
     }
-
+    @CrossOrigin
     @PostMapping("/discountRule/add")
     public ReturnWithMessage addDiscountRule(@RequestBody Map<String, Object> request) {
         double percentage = Double.parseDouble(request.get("percentage").toString());
@@ -58,7 +64,7 @@ public class AutomationRestController {
         }
         return new ReturnWithMessage(false, "Non hai i permessi");
     }
-
+    @CrossOrigin
     @PostMapping("/stockRule/add")
     public ReturnWithMessage addStockRule(@RequestBody Map<String, Object> request) {
         String token = request.get("userToken").toString();
@@ -68,7 +74,7 @@ public class AutomationRestController {
             return automationRestService.addStockRule(new StocksRules(minMax, number));
         return new ReturnWithMessage(false, "Non hai i permessi");
     }
-
+    @CrossOrigin
     @PostMapping("/stockRule/modify")
     public ReturnWithMessage modifyStockRule(@RequestBody Map<String, Object> request) {
         String token = request.get("userToken").toString();
@@ -78,7 +84,7 @@ public class AutomationRestController {
             return automationRestService.modifyStockRule(number, id);
         return new ReturnWithMessage(false, "Non hai i permessi");
     }
-
+    @CrossOrigin
     @PostMapping("/discountRule/modify")
     public ReturnWithMessage modifyDiscountRule(@RequestBody Map<String, Object> request) {
         String token = request.get("userToken").toString();
@@ -90,7 +96,7 @@ public class AutomationRestController {
             return automationRestService.modifyDiscountRule(new DiscountRules(id, percentage, period, typePeriod));
         return new ReturnWithMessage(false, "Non hai i permessi");
     }
-
+    @CrossOrigin
     @PostMapping("/stockRule/delete")
     public ReturnWithMessage removeStockRule(@RequestBody Map<String, Object> request) {
         String token = request.get("userToken").toString();
@@ -99,7 +105,7 @@ public class AutomationRestController {
             return automationRestService.removeStockRule(id);
         return new ReturnWithMessage(false, "Non hai i permessi");
     }
-
+    @CrossOrigin
     @PostMapping("/discountRule/delete")
     public ReturnWithMessage removeDiscountRule(@RequestBody Map<String, Object> request) {
         String token = request.get("userToken").toString();
@@ -108,7 +114,7 @@ public class AutomationRestController {
             return automationRestService.removeDiscountRule(id);
         return new ReturnWithMessage(false, "Non hai i permessi");
     }
-
+    @CrossOrigin
     @PostMapping("/automation/active")
     public ReturnWithMessage activeAutomation(@RequestBody Map<String, Object> request) {
         String token = request.get("userToken").toString();
@@ -117,7 +123,7 @@ public class AutomationRestController {
             return automationRestService.activeAutomation(id);
         return new ReturnWithMessage(false, "Non hai i permessi");
     }
-
+    @CrossOrigin
     @PostMapping("/automation/disable")
     public ReturnWithMessage disableAutomation(@RequestBody Map<String, Object> request) {
         String token = request.get("userToken").toString();
@@ -127,7 +133,7 @@ public class AutomationRestController {
         return new ReturnWithMessage(false, "Non hai i permessi");
     }
 
-
+    @CrossOrigin
     @GetMapping("/automation/management/{id}")
     public void OrderManagement(@PathVariable("id") long idProduct) {
         automationRestService.OrderManagement(idProduct);

@@ -16,7 +16,7 @@ import java.util.Map;
 public class CategoryRestController {
     @Autowired
     private CategoryRestService categoryRestService;
-
+    @CrossOrigin
     @GetMapping("/categories/{idSupplier}")
     public List<Category> getCategories(@PathVariable long idSupplier, @RequestHeader(value = "userToken") String token) {
         //System.out.println(idSupplier);

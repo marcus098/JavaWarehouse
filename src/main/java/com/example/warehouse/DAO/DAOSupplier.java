@@ -1,6 +1,7 @@
 package com.example.warehouse.DAO;
 
 import com.example.warehouse.DAO.eccezioni.DAOException;
+import com.example.warehouse.model.ReturnWithMessage;
 import com.example.warehouse.model.Supplier;
 import com.example.warehouse.model.User;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ public class DAOSupplier {
     private static final String FIND_BY_ID = "SELECT * FROM fornitore WHERE id = ? LIMIT 1";
     private static final String UPDATE_NAME = "UPDATE fornitore SET nome = ? WHERE id= ? LIMIT 1";
     private static final String UPDATE_EMAIL = "UPDATE fornitore SET email = ? WHERE id= ?";
+    private static final String UPDATE = "UPDATE fornitore SET nome = ?, email = ?, telefono = ?, api = ? WHERE id = ?";
     private static final String UPDATE_TELEFONO = "UPDATE fornitore SET telefono = ? WHERE id= ?";
     private static final String UPDATE_API = "UPDATE fornitore SET api = ? WHERE id= ?";
     private static final String DELETE = "DELETE FROM fornitore WHERE id = ?";
@@ -36,11 +38,11 @@ public class DAOSupplier {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(INSERT);
-            preparedStatement.setString(1,supplier.getName());
-            preparedStatement.setString(2,supplier.getEmail());
-            preparedStatement.setString(3,supplier.getPhone());
-            preparedStatement.setString(4,supplier.getApi());
-           // System.out.println(preparedStatement);
+            preparedStatement.setString(1, supplier.getName());
+            preparedStatement.setString(2, supplier.getEmail());
+            preparedStatement.setString(3, supplier.getPhone());
+            preparedStatement.setString(4, supplier.getApi());
+            // System.out.println(preparedStatement);
             preparedStatement.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -49,13 +51,14 @@ public class DAOSupplier {
             //throw new DAOException("Impossibile inserire il fornitore, errore DB");
         }
     }
+
     public boolean insertProductSupplier(Connection connection, long idProduct, long idSupplier, double price) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(INSERT_PRODUCT_SUPPLIER);
-            preparedStatement.setLong(1,idProduct);
-            preparedStatement.setLong(2,idSupplier);
-            preparedStatement.setDouble(3,price);
+            preparedStatement.setLong(1, idProduct);
+            preparedStatement.setLong(2, idSupplier);
+            preparedStatement.setDouble(3, price);
             preparedStatement.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -64,6 +67,7 @@ public class DAOSupplier {
             //throw new DAOException("Impossibile inserire il fornitore, errore DB");
         }
     }
+
     public List<Supplier> searchAll(Connection connection) throws DAOException {
         List<Supplier> list = new ArrayList<>();
         PreparedStatement preparedStatement = null;
@@ -77,7 +81,7 @@ public class DAOSupplier {
                 String name = resultSet.getString("nome");
                 String phone = resultSet.getString("telefono");
                 String api = resultSet.getString("api");
-                list.add(new Supplier(id,name,email, phone, api));
+                list.add(new Supplier(id, name, email, phone, api));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -86,7 +90,24 @@ public class DAOSupplier {
         return list;
     }
 
-    public List<Supplier> getSupplierByIdProduct(Connection connection, long idProduct){
+    public ReturnWithMessage modify(Connection connection, long idSupplier, String name, String email, String phone, String api) {
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(UPDATE);
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, email);
+            preparedStatement.setString(3, phone);
+            preparedStatement.setString(4, api);
+            preparedStatement.setLong(5, idSupplier);
+            preparedStatement.executeUpdate();
+            return new ReturnWithMessage(true, "Aggiunto con successo");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ReturnWithMessage(false, "Impossibile modificare i dati del fornitore, errore DB");
+        }
+    }
+
+    public List<Supplier> getSupplierByIdProduct(Connection connection, long idProduct) {
         List<Supplier> list = new ArrayList<>();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -101,7 +122,7 @@ public class DAOSupplier {
                 String name = resultSet.getString("nome");
                 String api = resultSet.getString("api");
                 double price = resultSet.getDouble("costo_prodotto");
-                list.add(new Supplier(id,name,email, phone, api, price));
+                list.add(new Supplier(id, name, email, phone, api, price));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -109,13 +130,14 @@ public class DAOSupplier {
         }
         return list;
     }
+
     public List<Supplier> searchByName(Connection connection, String name) throws DAOException {
         List<Supplier> list = new ArrayList<>();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
             preparedStatement = connection.prepareStatement(FIND_BY_NAME);
-            preparedStatement.setString(1, "%"+name+"%");
+            preparedStatement.setString(1, "%" + name + "%");
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 long id = resultSet.getLong("id");
@@ -123,7 +145,7 @@ public class DAOSupplier {
                 String nameSupplier = resultSet.getString("nome");
                 String phone = resultSet.getString("telefono");
                 String api = resultSet.getString("api");
-                list.add(new Supplier(id,nameSupplier,email, phone, api));
+                list.add(new Supplier(id, nameSupplier, email, phone, api));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -206,15 +228,17 @@ public class DAOSupplier {
         }
     }
 
-    public void delete(Connection connection, Supplier supplier) throws DAOException {
+    public ReturnWithMessage delete(Connection connection, long id) throws DAOException {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(DELETE);
-            preparedStatement.setLong(1, supplier.getId());
+            preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
+            return new ReturnWithMessage(true, "Eliminato con successo");
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new DAOException("Impossibile eliminare il fornitore, errore DB");
+            return new ReturnWithMessage(false, "Impossibile eliminare il fornitore, errore DB");
+           // throw new DAOException("Impossibile eliminare il fornitore, errore DB");
         }
     }
 

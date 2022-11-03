@@ -34,17 +34,19 @@ public class UserRestController {
     * 14) /position
     * 15) /automation
     */
+    @CrossOrigin
     @PostMapping("/auth")
     public Map<String, String> get(@RequestBody Map<String, String> map) {
         Map mapReturn = userRestService.loginUser(map.get("email"), map.get("password"));
         return mapReturn;
     }
-
+    @CrossOrigin
     @PostMapping("/logout")
     public int logout(@RequestBody Map<String, String> token) {
         return userRestService.logoutUser(token.get("value"));
     }
 
+    @CrossOrigin
     @PostMapping("/check")
     public ReturnWithMessage checkToken(@RequestBody Map<String, String> value) {
         int page = 0;
@@ -52,9 +54,17 @@ public class UserRestController {
             page = Integer.parseInt(value.get("page"));
         if(page == 0)
             return new ReturnWithMessage(false, "Errore");
-        return userRestService.checkToken(value.get("value"), page);
+
+        if(page!=16)
+            return userRestService.checkToken(value.get("value"), page);
+        int val =  userRestService.checkToken(value.get("value"));
+        if(val == 1){//vuoto
+            return new ReturnWithMessage(false, "Utente non presente");
+        }
+        return new ReturnWithMessage(true, "Utente presente");
     }
 
+    @CrossOrigin
     @PostMapping("/user/add")
     public ReturnWithMessage addUser(@RequestBody Map<String, String> request) {
         if(userRestService.checkToken(request.get("userToken"), 12).isBool()) {
@@ -73,6 +83,7 @@ public class UserRestController {
         }
     }
 
+    @CrossOrigin
     @GetMapping("/user/delete/{id}")
     public ReturnWithMessage removeUser(@PathVariable("id") long id, @RequestHeader(value="userToken") String token){
         if(userRestService.checkToken(token, 9).isBool())
@@ -80,7 +91,7 @@ public class UserRestController {
         else
             return userRestService.checkToken(token, 9);
     }
-
+    @CrossOrigin
     @PostMapping("/getRole")
     public ReturnWithMessage getRole(@RequestBody Map<String, String> request){
         String token = request.get("token");
@@ -90,7 +101,7 @@ public class UserRestController {
             return new ReturnWithMessage(false, "Utente non loggato");
         }
     }
-
+    @CrossOrigin
     @PostMapping("/user/modify/{id}")
     public ReturnWithMessage modifyUser(@PathVariable("id") long idUser, @RequestBody Map<String, String> request){
         String token = request.get("userToken");
@@ -105,7 +116,7 @@ public class UserRestController {
         else
             return userRestService.checkToken(token, 9);
     }
-
+    @CrossOrigin
     @PostMapping("/users")
     public List<User> getUsers(@RequestBody Map<String, String> request) {
         String token = request.get("token");
@@ -119,7 +130,7 @@ public class UserRestController {
         }
         return new ArrayList<>();
     }
-
+    @CrossOrigin
     @PostMapping("/getUser")
     public User getUserByToken(@RequestBody Map<String, String> request) {
         String token = "";
@@ -129,7 +140,7 @@ public class UserRestController {
         }
         return null;
     }
-
+    @CrossOrigin
     @PostMapping("/user/modify")
     public ReturnWithMessage modifyUser(@RequestBody Map<String, String> request) {
         String token = request.get("userToken");

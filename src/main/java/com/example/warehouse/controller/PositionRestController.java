@@ -16,28 +16,28 @@ import java.util.Map;
 public class PositionRestController {
     @Autowired
     PositionRestService positionRestService;
-
+    @CrossOrigin
     @GetMapping("/position/{name}/{id}")
     public List<Position> searchPositionByName(@PathVariable("name") String name, @PathVariable("id") long idProduct, @RequestHeader(value = "userToken") String token) {
         if (positionRestService.checkToken(token, 14))
             return positionRestService.searchPositionByName(name, idProduct);
         return new ArrayList<>();
     }
-
+    @CrossOrigin
     @GetMapping("/position/{id}")
     public List<Position> searchPositionByIdProduct(@PathVariable("id") long idProduct, @RequestHeader(value = "userToken") String token) {
         if (positionRestService.checkToken(token, 14))
             return positionRestService.searchPositionByIdProduct(idProduct);
         return new ArrayList<>();
     }
-
+    @CrossOrigin
     @GetMapping("/positions")
     public List<Position> getPositions(@RequestHeader(value = "userToken") String token) {
         if (positionRestService.checkToken(token, 14))
             return positionRestService.getPositions();
         return new ArrayList<>();
     }
-
+    @CrossOrigin
     @PostMapping("/position/add")
     public ReturnWithMessage addPosition(@RequestBody String jsonString) {
         Gson gson = new Gson();
@@ -50,7 +50,7 @@ public class PositionRestController {
         }
         return new ReturnWithMessage(false, "Non hai i permessi");
     }
-
+    @CrossOrigin
     @PostMapping("/position/updateProduct")
     public ReturnWithMessage updateProductPosition(@RequestBody String jsonString) {
         Gson gson = new Gson();
@@ -65,14 +65,14 @@ public class PositionRestController {
         }
         return new ReturnWithMessage(false, "Dati mancanti o autorizzazione neagata");
     }
-
+    @CrossOrigin
     @PostMapping("/position/delete/{id}")
     public boolean deletePosition(@PathVariable("id") long id, @RequestBody Map<String, String> request) {
         if (positionRestService.checkToken(request.get("userToken"), 14))
             return positionRestService.deletePosition(id);
         return false;
     }
-
+    @CrossOrigin
     @PostMapping("/position/empty/{id}")
     public boolean emptyPosition(@PathVariable("id") long id) {
         return positionRestService.emptyPosition(id);

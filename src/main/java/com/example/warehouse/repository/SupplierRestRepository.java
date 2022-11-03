@@ -5,6 +5,7 @@ import com.example.warehouse.DAO.DAOSupplier;
 import com.example.warehouse.DAO.DataSource;
 import com.example.warehouse.DAO.eccezioni.DAOException;
 import com.example.warehouse.model.ClientBuy;
+import com.example.warehouse.model.ReturnWithMessage;
 import com.example.warehouse.model.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -68,5 +69,25 @@ public class SupplierRestRepository {
             return null;
         }
         return list;
+    }
+
+    public ReturnWithMessage removeSupplier(long id) {
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        try {
+            return daoSupplier.delete(connection, id);
+        } catch (DAOException e) {
+            return new ReturnWithMessage(false, "Errore!");
+        }
+    }
+
+    public ReturnWithMessage modifySupplier(long idSupplier, String name, String email, String phone, String api) {
+        Connection connection = null;
+        connection = dataSource.getConnection();
+        try {
+            return daoSupplier.modify(connection, idSupplier, name, email, phone, api);
+        } catch (Exception e) {
+            return new ReturnWithMessage(false, "Errore");
+        }
     }
 }

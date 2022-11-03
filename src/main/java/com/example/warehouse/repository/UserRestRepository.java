@@ -107,7 +107,6 @@ public class UserRestRepository {
         Optional<User> userOptional = userList.stream()
                 .filter(user -> user.checkToken(token) == true)
                 .findFirst();
-        System.out.println(token + " ----- ");
         userList.stream().forEach(user -> System.out.println(user.getTokenList()));
         if (userOptional.isEmpty())
             return 1;

@@ -23,10 +23,15 @@ public class DataSource {
     private void load() {
         try {
             dbProperties = new Properties();
+            System.out.println(DataSource.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+
             InputStream inputStream = DataSource.class.getClassLoader().getResourceAsStream("./jdbc.properties");
+            //System.out.println(inputStream);
             dbProperties.load(inputStream);
             dbDriver = (Driver) Class.forName(dbProperties.getProperty("DriverClassName")).newInstance();
+            //dbDriver = (Driver) Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
             url = dbProperties.getProperty("url");
+           // url = "jdbc:mysql://localhost:3306/warehouse?useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false";
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -43,6 +48,10 @@ public class DataSource {
         Connection connection = null;
         try {
             connection = dbDriver.connect(url, dbProperties);
+            /*Properties p = new Properties();
+            p.setProperty("user", "root");
+            p.setProperty("password", "Marcus98!");
+            connection = dbDriver.connect(url, p);*/
         } catch (SQLException sqle) {
             sqle.printStackTrace();
         }
